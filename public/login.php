@@ -1,63 +1,61 @@
+
 <?php
-session_start();
-require_once '../config/db.php';
+include_once("Connection.pdo.php");
 require_once '../classes/User.php';
 
-use Config\Database;
-use Classes\User;
 
-$db = (new Database())->connect();
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['Getinfo'])) {
+    $name = $_POST['name'];
+    $pass = $_POST['password'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $user = User::login($db, $email, $password);
+    // إنشاء كائن من كلاس Admin
+    $admin = new Admin(0, $name, '', '', 0, $pass); // userId يمكن أن تكون 0 للبدء
 
-    if ($user) {
-        $_SESSION['user_id'] = $user->getUserId();
-        $_SESSION['user_name'] = $user->getName();
-        $_SESSION['role'] = $user->getRole();  // تخزين الدور في الجلسة
-        
-        header("Location: index.php");
-        exit();
-    } else {
-        $error = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
-    }
+    // محاولة تسجيل الدخول
+    $admin->login($conn, $name, $pass);
 }
 ?>
 
-?>
+
 
 <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل الدخول</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin: 15px auto;
+            border-radius: 5px;
+            width: 300px; /* عرض محدد للصندوق */
+            text-align: center; /* مركز النص */
+        }
+    </style>
 </head>
 <body>
-
-    <!-- شريط التنقل -->
-    <div class="navbar">
-        <a href="index.php">الفعاليات</a>
-        <a href="my_bookings.php">حجوزاتي</a>
-        <a href="register.php">إنشاء حساب جديد</a>
-    </div>
-
-    <div class="login-container">
-        <h2>تسجيل الدخول</h2>
-        <?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
-        <form method="post" action="login.php">
-            <label for="email">البريد الإلكتروني:</label>
-            <input type="email" name="email" id="email" required>
-            <br>
-            <label for="password">كلمة المرور:</label>
-            <input type="password" name="password" id="password" required>
-            <br>
-            <button type="submit" class="btn">تسجيل الدخول</button>
+    <main class="login-container">
+        <h1>تسجيل دخول المشرف</h1>
+        <form id="login-form" method="post">
+            <label for="name">اسم المشرف:</label>
+            <input type="text" name="name" required>
+            <label for="password">الرمز السري:</label>
+            <input type="password" name="password" required>
+            <button type="submit" name="Getinfo">تسجيل الدخول</button>
         </form>
-        <p>ليس لديك حساب؟ <a href="register.php">إنشاء حساب جديد</a></p>
-    </div>
 
+        <!-- عرض رسالة الخطأ إذا كانت موجودة -->
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="error-message">
+                <?= $_SESSION['error_message']; ?>
+            </div>
+            <?php unset($_SESSION['error_message']); // مسح الرسالة بعد عرضها ?>
+        <?php endif; ?>
+    </main>
 </body>
 </html>
