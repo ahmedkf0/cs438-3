@@ -47,14 +47,18 @@ class User {
     
 
     // دالة إنشاء حساب جديد
-    public static function register($db, $name, $email, $password, $role) {
-        $stmt = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, :role)");
+    public static function register($db, $name, $email, $password, $role, $phone_number, $birthdate) {
+        $stmt = $db->prepare("INSERT INTO users (name, email, password, role, phone_number, birthdate) 
+                              VALUES (:name, :email, :password, :role, :phone_number, :birthdate)");
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $stmt->bindParam(':name', $name);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $hashedPassword);
         $stmt->bindParam(':role', $role);
+        $stmt->bindParam(':phone_number', $phone_number);
+        $stmt->bindParam(':birthdate', $birthdate);
         return $stmt->execute();
     }
+    
     
 }

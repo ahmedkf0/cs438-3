@@ -95,7 +95,7 @@ $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?php echo htmlspecialchars($booking['booking_id']); ?></td>
                     <td><?php echo htmlspecialchars($booking['title']); ?></td>
                     <td><?php echo htmlspecialchars($booking['num_tickets']); ?></td>
-                    <td><?php echo htmlspecialchars($booking['total_price']); ?> ريال</td>
+                    <td>دينار ليبي <?php echo htmlspecialchars($booking['total_price']); ?> </td>
                     <td><?php echo htmlspecialchars($booking['booking_date']); ?></td>
                     <td><?php echo htmlspecialchars($booking['event_date']); ?></td>
                     <td>

@@ -43,7 +43,7 @@ $events = Event::getAllEvents($db);
                 <h2><?php echo htmlspecialchars($event->getTitle()); ?></h2>
                 <p><?php echo htmlspecialchars($event->getDescription()); ?></p>
                 <p><strong>الموقع:</strong> <?php echo htmlspecialchars($event->getLocation()); ?></p>
-                <p><strong>السعر:</strong> <?php echo htmlspecialchars($event->getPrice()); ?> ريال</p>
+                <p><strong>السعر:</strong> <?php echo htmlspecialchars($event->getPrice()); ?> دينار ليبي</p>
                 <p><strong>المقاعد المتاحة:</strong> <?php echo htmlspecialchars($event->getAvailableSeats()); ?></p>
                 <p><strong>العمر الأدنى:</strong> <?php echo htmlspecialchars($event->getAgeRestriction()); ?> سنوات</p>
                 <p><strong>تاريخ الحدث:</strong> <?php echo htmlspecialchars($event->getDate()); ?></p>
