@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </script>
 </head>
-<body>
+<body > 
 
     <!-- شريط التنقل -->
     <div class="navbar">
@@ -149,8 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="payment-container">
         <h1>إتمام عملية الدفع للفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
         <p>عدد التذاكر: <?php echo htmlspecialchars($numTickets); ?></p>
-        <p>السعر الأصلي: <?php echo htmlspecialchars($originalPrice); ?> ريال</p>
-        <p>السعر بعد الخصم: <?php echo htmlspecialchars($discountedPrice); ?> ريال</p>
+        <p>السعر الأصلي: <?php echo htmlspecialchars($originalPrice); ?> دينار ليبي</p>
+        <p>السعر بعد الخصم: <?php echo htmlspecialchars($discountedPrice); ?> دينار ليبي</p>
         
         <form method="POST" action="checkout.php?booking_id=<?php echo $bookingId; ?>">
             <div class="payment-field">

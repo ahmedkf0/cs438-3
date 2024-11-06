@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="booking-container">
         <h1>حجز الفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
-        <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars($event['price']); ?> ريال</p>
+        <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars($event['price']); ?> دينار ليبي</p>
         <form method="POST" action="booking.php?event_id=<?php echo $eventId; ?>">
             <label for="quantity">عدد التذاكر:</label>
             <input type="number" name="quantity" id="quantity" min="1" required>
