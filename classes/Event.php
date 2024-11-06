@@ -12,8 +12,9 @@ class Event {
     private string $location;
     private float $price;
     private int $availableSeats;
+    private int $ageRestriction; // الخاصية الجديدة
 
-    public function __construct(int $eventId, string $title, string $description, string $date, string $time, string $location, float $price, int $availableSeats) {
+    public function __construct(int $eventId, string $title, string $description, string $date, string $time, string $location, float $price, int $availableSeats, int $ageRestriction) {
         $this->eventId = $eventId;
         $this->title = $title;
         $this->description = $description;
@@ -22,9 +23,10 @@ class Event {
         $this->location = $location;
         $this->price = $price;
         $this->availableSeats = $availableSeats;
+        $this->ageRestriction = $ageRestriction; // تعيين قيمة العمر الأدنى
     }
 
-    // Getter methods for each private property
+    // Getter methods
     public function getEventId(): int {
         return $this->eventId;
     }
@@ -57,6 +59,10 @@ class Event {
         return $this->availableSeats;
     }
 
+    public function getAgeRestriction(): int {
+        return $this->ageRestriction;
+    }
+
     public static function getAllEvents(PDO $db): array {
         $stmt = $db->query("SELECT * FROM events");
         $eventsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -71,12 +77,15 @@ class Event {
                 $eventData['time'],
                 $eventData['location'],
                 $eventData['price'],
-                $eventData['available_seats']
+                $eventData['available_seats'],
+                $eventData['age_restriction'] // جلب قيمة العمر الأدنى من قاعدة البيانات
             );
         }
 
         return $events;
     }
+
+
 
     public static function getEventById(PDO $db, int $eventId): ?array {
         $stmt = $db->prepare("SELECT * FROM events WHERE event_id = :eventId");
