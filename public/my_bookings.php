@@ -88,7 +88,6 @@ $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <th>السعر الإجمالي</th>
                 <th>تاريخ الحجز</th>
                 <th>تاريخ الفعالية</th>
-                <th>الحالة</th>
                 <th>إلغاء الحجز</th>
             </tr>
             <?php foreach ($bookings as $booking): ?>
@@ -99,7 +98,6 @@ $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td><?php echo htmlspecialchars($booking['total_price']); ?> ريال</td>
                     <td><?php echo htmlspecialchars($booking['booking_date']); ?></td>
                     <td><?php echo htmlspecialchars($booking['event_date']); ?></td>
-                    <td><?php echo htmlspecialchars($booking['status']); ?></td>
                     <td>
                         <?php if ($booking['hours_until_event'] > 24): ?>
                             <a href="my_bookings.php?cancel=<?php echo $booking['booking_id']; ?>" onclick="return confirm('هل أنت متأكد من إلغاء الحجز؟');">إلغاء</a>
