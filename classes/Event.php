@@ -24,9 +24,58 @@ class Event {
         $this->availableSeats = $availableSeats;
     }
 
+    // Getter methods for each private property
+    public function getEventId(): int {
+        return $this->eventId;
+    }
+
+    public function getTitle(): string {
+        return $this->title;
+    }
+
+    public function getDescription(): string {
+        return $this->description;
+    }
+
+    public function getDate(): string {
+        return $this->date;
+    }
+
+    public function getTime(): string {
+        return $this->time;
+    }
+
+    public function getLocation(): string {
+        return $this->location;
+    }
+
+    public function getPrice(): float {
+        return $this->price;
+    }
+
+    public function getAvailableSeats(): int {
+        return $this->availableSeats;
+    }
+
     public static function getAllEvents(PDO $db): array {
         $stmt = $db->query("SELECT * FROM events");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $eventsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $events = [];
+        foreach ($eventsData as $eventData) {
+            $events[] = new Event(
+                $eventData['event_id'],
+                $eventData['title'],
+                $eventData['description'],
+                $eventData['date'],
+                $eventData['time'],
+                $eventData['location'],
+                $eventData['price'],
+                $eventData['available_seats']
+            );
+        }
+
+        return $events;
     }
 
     public static function getEventById(PDO $db, int $eventId): ?array {
@@ -36,3 +85,4 @@ class Event {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }
+?>

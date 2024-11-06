@@ -38,18 +38,18 @@ $events = Event::getAllEvents($db);
     <h1>الفعاليات المتاحة</h1>
 
     <div class="events-container">
-        <?php foreach ($events as $event): ?>
-            <div class="event-card">
-                <h2><?php echo htmlspecialchars($event['title']); ?></h2>
-                <p><?php echo htmlspecialchars($event['description']); ?></p>
-                <p><strong>الموقع:</strong> <?php echo htmlspecialchars($event['location']); ?></p>
-                <p><strong>السعر:</strong> <?php echo htmlspecialchars($event['price']); ?> ريال</p>
-                <p><strong>المقاعد المتاحة:</strong> <?php echo htmlspecialchars($event['available_seats']); ?></p>
-                <a class="btn" href="booking.php?event_id=<?php echo $event['event_id']; ?>">احجز الآن</a>
-            </div>
-        <?php endforeach; ?>
+    <?php foreach ($events as $event): ?>
+    <div class="event-card">
+        <h2><?php echo htmlspecialchars($event->getTitle()); ?></h2>
+        <p><?php echo htmlspecialchars($event->getDescription()); ?></p>
+        <p><strong>الموقع:</strong> <?php echo htmlspecialchars($event->getLocation()); ?></p>
+        <p><strong>السعر:</strong> <?php echo htmlspecialchars($event->getPrice()); ?> ريال</p>
+        <p><strong>المقاعد المتاحة:</strong> <?php echo htmlspecialchars($event->getAvailableSeats()); ?></p>
+        <a class="btn" href="booking.php?event_id=<?php echo $event->getEventId(); ?>">احجز الآن</a>
+    </div>
+<?php endforeach; ?>
+
     </div>
 
 </body>
 </html>
-
