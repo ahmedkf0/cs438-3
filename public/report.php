@@ -6,42 +6,15 @@ require_once '../classes/booking.php';
 require_once '../classes/payment.php';
 require_once '../classes/User.php';
 require_once '../classes/Event.php';
+require_once '../classes/Admin.php';
+require_once '../classes/report.php';
 
-// دالة لحساب إجمالي التذاكر المباعة
-function getTotalTicketsSold($conn) {
-    $stmt = $conn->prepare("SELECT COUNT(*) AS total_tickets FROM bookings");
-    $stmt->execute();
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $result['total_tickets'] ?? 0;
-}
+// تأكد من تمرير المتغيرات المناسبة إلى الكلاس Report
+$report = new Report(null, null, null, null, null); // عليك ضبط القيم حسب الحاجة
 
-// دالة لإحصاء الحدث الأكثر مبيعًا
-function getMostPopularEvent($conn) {
-    $stmt = $conn->prepare("
-        SELECT event_id, COUNT(*) AS ticket_count 
-        FROM bookings 
-        GROUP BY event_id 
-        ORDER BY ticket_count DESC 
-        LIMIT 1
-    ");
-    $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
-// دالة لتقديم تقرير مبيعات التذاكر
-function getTicketSalesReport($conn) {
-    $stmt = $conn->prepare("
-        SELECT event_id, SUM(total_price) AS total_sales 
-        FROM bookings 
-        GROUP BY event_id
-    ");
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-$totalTickets = getTotalTicketsSold($conn);
-$mostPopularEvent = getMostPopularEvent($conn);
-$salesReport = getTicketSalesReport($conn);
+$totalTickets = $report->getTotalTicketsSold($conn);
+$mostPopularEvent = $report->getMostPopularEvent($conn);
+$salesReport = $report->getTicketSalesReport($conn);
 ?>
 
 <!DOCTYPE html>
