@@ -19,7 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($password !== $confirmPassword) {
         $error = "كلمتا المرور غير متطابقتين.";
     } else {
-        $registered = User::register($db, $name, $email, $password, $role, $phone_number, $birthdate);
+        $occupation = ($role === 'client') ? $_POST['occupation'] : null;
+
+        $registered = User::register($db, $name, $email, $password, $role, $phone_number, $birthdate, $occupation);
+
         if ($registered) {
             header("Location: login.php");
             exit();
@@ -68,10 +71,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <input type="password" name="confirm_password" id="confirm_password" required>
     <br>
     <label for="role">نوع الحساب:</label>
-    <select name="role" id="role" required>
-        <option value="client">عميل</option>
-        <option value="admin">أدمن</option>
-    </select>
+<select name="role" id="role" required onchange="toggleOccupation()">
+    <option value="client">عميل</option>
+    <option value="admin">أدمن</option>
+</select>
+<br>
+
+<div id="occupation-field" style="display: none;">
+    <label for="occupation">الوظيفة:</label>
+    <input type="text" name="occupation" id="occupation">
+    <br>
+</div>
+
+<script>
+    function toggleOccupation() {
+        const role = document.getElementById('role').value;
+        document.getElementById('occupation-field').style.display = (role === 'client') ? 'block' : 'none';
+    }
+</script>
+
     <br>
     <button type="submit" class="btn">إنشاء حساب</button>
 </form>

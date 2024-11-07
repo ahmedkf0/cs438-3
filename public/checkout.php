@@ -34,9 +34,26 @@ if (!$booking) {
 $event = Event::getEventById($db, $booking['event_id']);
 $originalPrice = (float) $booking['total_price'];
 $numTickets = $booking['num_tickets'];
+// Fetch user details to calculate age and get occupation
+$userId = $booking['user_id'];
+$userStmt = $db->prepare("SELECT birthdate, occupation FROM users WHERE user_id = :userId");
+$userStmt->bindParam(':userId', $userId);
+$userStmt->execute();
+$user = $userStmt->fetch(PDO::FETCH_ASSOC);
 
-// حساب السعر بعد الخصم
-$discount = new Discount("VIP", 10, true);  // نفترض خصم بنسبة 10%
+if (!$user) {
+    die("User not found.");
+}
+
+// Calculate age
+$birthdate = new DateTime($user['birthdate']);
+$today = new DateTime();
+$age = $today->diff($birthdate)->y;
+
+// Get occupation
+$occupation = $user['occupation'];
+// Apply discount based on age and occupation
+$discount = new Discount($age, $occupation);
 $discountedPrice = $discount->applyDiscount($originalPrice);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

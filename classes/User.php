@@ -50,9 +50,9 @@ class User {
     
 
     // دالة إنشاء حساب جديد
-    public static function register($db, $name, $email, $password, $role, $phone_number, $birthdate) {
-        $stmt = $db->prepare("INSERT INTO users (name, email, password, role, phone_number, birthdate) 
-                              VALUES (:name, :email, :password, :role, :phone_number, :birthdate)");
+    public static function register($db, $name, $email, $password, $role, $phone_number, $birthdate, $occupation = null) {
+        $stmt = $db->prepare("INSERT INTO users (name, email, password, role, phone_number, birthdate, occupation) 
+                              VALUES (:name, :email, :password, :role, :phone_number, :birthdate, :occupation)");
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $stmt->bindParam(':name', $name);
         $stmt->bindParam(':email', $email);
@@ -60,6 +60,7 @@ class User {
         $stmt->bindParam(':role', $role);
         $stmt->bindParam(':phone_number', $phone_number);
         $stmt->bindParam(':birthdate', $birthdate);
+        $stmt->bindParam(':occupation', $occupation);
         return $stmt->execute();
     }
     
