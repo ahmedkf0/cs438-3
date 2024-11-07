@@ -1,6 +1,8 @@
 <?php
 namespace Classes;
 
+use Exception;
+
 class Discount {
     private int $age;
     private string $occupation;
@@ -24,7 +26,12 @@ class Discount {
     }
 
     public function applyDiscount(float $price): float {
-        $discountPercentage = $this->getDiscountPercentage();
-        return $price * ((100 - $discountPercentage) / 100);
+        try {
+            $discountPercentage = $this->getDiscountPercentage();
+            return $price * ((100 - $discountPercentage) / 100);
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء تطبيق الخصم: " . $e->getMessage() . "</p>";
+            return $price; // Return original price if there's an error
+        }
     }
 }

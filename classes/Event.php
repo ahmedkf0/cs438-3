@@ -2,6 +2,7 @@
 namespace Classes;
 
 use PDO;
+use Exception;
 
 class Event {
     private int $eventId;
@@ -12,7 +13,7 @@ class Event {
     private string $location;
     private float $price;
     private int $availableSeats;
-    private int $ageRestriction; // الخاصية الجديدة
+    private int $ageRestriction;
 
     public function __construct(int $eventId, string $title, string $description, string $date, string $time, string $location, float $price, int $availableSeats, int $ageRestriction) {
         $this->eventId = $eventId;
@@ -23,7 +24,7 @@ class Event {
         $this->location = $location;
         $this->price = $price;
         $this->availableSeats = $availableSeats;
-        $this->ageRestriction = $ageRestriction; // تعيين قيمة العمر الأدنى
+        $this->ageRestriction = $ageRestriction;
     }
 
     // Getter methods
@@ -64,34 +65,42 @@ class Event {
     }
 
     public static function getAllEvents(PDO $db): array {
-        $stmt = $db->query("SELECT * FROM events");
-        $eventsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $db->query("SELECT * FROM events");
+            $eventsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $events = [];
-        foreach ($eventsData as $eventData) {
-            $events[] = new Event(
-                $eventData['event_id'],
-                $eventData['title'],
-                $eventData['description'],
-                $eventData['date'],
-                $eventData['time'],
-                $eventData['location'],
-                $eventData['price'],
-                $eventData['available_seats'],
-                $eventData['age_restriction'] // جلب قيمة العمر الأدنى من قاعدة البيانات
-            );
+            $events = [];
+            foreach ($eventsData as $eventData) {
+                $events[] = new Event(
+                    $eventData['event_id'],
+                    $eventData['title'],
+                    $eventData['description'],
+                    $eventData['date'],
+                    $eventData['time'],
+                    $eventData['location'],
+                    $eventData['price'],
+                    $eventData['available_seats'],
+                    $eventData['age_restriction']
+                );
+            }
+
+            return $events;
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء جلب الفعاليات: " . $e->getMessage() . "</p>";
+            return [];
         }
-
-        return $events;
     }
 
-
-
     public static function getEventById(PDO $db, int $eventId): ?array {
-        $stmt = $db->prepare("SELECT * FROM events WHERE event_id = :eventId");
-        $stmt->bindParam(':eventId', $eventId);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $db->prepare("SELECT * FROM events WHERE event_id = :eventId");
+            $stmt->bindParam(':eventId', $eventId);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء جلب بيانات الفعالية: " . $e->getMessage() . "</p>";
+            return null;
+        }
     }
 }
 ?>

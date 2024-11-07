@@ -1,6 +1,8 @@
 <?php
 namespace Classes;
 
+use Exception;
+
 class Payment {
     private int $bookingId;
     private string $paymentMethod;
@@ -16,9 +18,31 @@ class Payment {
 
     // دالة محاكاة لمعالجة الدفع
     public function processPayment(): bool {
-        // يمكنك هنا إضافة منطق خاص بعملية الدفع الفعلية مثل API الدفع الخارجي
-        // سنقوم هنا بمحاكاة الدفع فقط بإرجاع true للدلالة على النجاح
-        $this->status = 'completed';
-        return true;
+        try {
+            // هنا يمكنك إضافة منطق خاص بعملية الدفع الفعلية مثل الاتصال بـ API دفع خارجي
+            // في هذه المحاكاة، سنقوم فقط بتغيير الحالة إلى "completed"
+            $this->status = 'completed';
+            return true;
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء معالجة الدفع: " . $e->getMessage() . "</p>";
+            return false;
+        }
+    }
+
+    // Getters for accessing payment details
+    public function getBookingId(): int {
+        return $this->bookingId;
+    }
+
+    public function getPaymentMethod(): string {
+        return $this->paymentMethod;
+    }
+
+    public function getAmount(): float {
+        return $this->amount;
+    }
+
+    public function getStatus(): string {
+        return $this->status;
     }
 }
