@@ -8,12 +8,14 @@ class User {
     private string $name;
     private string $email;
     private string $password;
-
-    public function __construct(int $userId, string $name, string $email, string $password) {
+    private string $role; // Add this property
+    
+    public function __construct(int $userId, string $name, string $email, string $password, string $role) {
         $this->userId = $userId;
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
+        $this->role = $role;
     }
 
     // دوال Getter للوصول إلى الخصائص الخاصة
@@ -31,15 +33,16 @@ class User {
         $stmt = $db->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
-
+    
         if ($stmt->rowCount() > 0) {
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
             if (password_verify($password, $userData['password'])) {
-                return new User($userData['user_id'], $userData['name'], $userData['email'], $userData['password']);
+                return new User($userData['user_id'], $userData['name'], $userData['email'], $userData['password'], $userData['role']);
             }
         }
         return null;
     }
+    
 
     public function getRole() {
         return $this->role;

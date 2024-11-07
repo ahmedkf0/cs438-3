@@ -16,14 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user) {
         $_SESSION['user_id'] = $user->getUserId();
         $_SESSION['user_name'] = $user->getName();
-        $_SESSION['role'] = $user->getRole();  // تخزين الدور في الجلسة
-        
-        header("Location: index.php");
+        $_SESSION['role'] = $user->getRole();
+
+        if ($user->getRole() === 'admin') {
+            header("Location: Selection.html");
+        } else {
+            header("Location: index.php");
+        }
         exit();
     } else {
         $error = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
     }
 }
+
+
 ?>
 
 ?>
