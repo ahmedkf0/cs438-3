@@ -8,18 +8,16 @@ class User {
     private string $name;
     private string $email;
     private string $password;
-    private string $phone_number;
-    private string $birthdate;
-    private string $role; // Add this property
-    
-    public function __construct(int $userId, string $name, string $email, string $password, string $role) {
+    private string $role;
+    private ?string $birthdate; // Nullable birthdate
+
+    public function __construct(int $userId, string $name, string $email, string $password, string $role, ?string $birthdate = null) {
         $this->userId = $userId;
         $this->name = $name;
         $this->email = $email;
-        $this->birthdate = $birthdate;
-        $this->phone_number = $phone_number;
         $this->password = $password;
         $this->role = $role;
+        $this->birthdate = $birthdate ?? ''; // Assign a default empty string if birthdate is null
     }
 
     // دوال Getter للوصول إلى الخصائص الخاصة
@@ -33,7 +31,7 @@ class User {
 
     // دالة تسجيل الدخول
     public static function login(PDO $db, string $email, string $password): ?User {
-        $query = "SELECT * FROM users WHERE email = :email";
+        $query = "SELECT user_id, name, email, password, role, birthdate FROM users WHERE email = :email";
         $stmt = $db->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
@@ -41,11 +39,19 @@ class User {
         if ($stmt->rowCount() > 0) {
             $userData = $stmt->fetch(PDO::FETCH_ASSOC);
             if (password_verify($password, $userData['password'])) {
-                return new User($userData['user_id'], $userData['name'], $userData['email'], $userData['password'], $userData['role']);
+                return new User(
+                    $userData['user_id'],
+                    $userData['name'],
+                    $userData['email'],
+                    $userData['password'],
+                    $userData['role'],
+                    $userData['birthdate'] // This could be null, so ensure the constructor handles it
+                );
             }
         }
         return null;
     }
+    
     
 
     public function getRole() {
