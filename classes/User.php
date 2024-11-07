@@ -8,6 +8,8 @@ class User {
     private string $name;
     private string $email;
     private string $password;
+    private string $phone_number;
+    private string $birthdate;
     private string $role; // Add this property
     
     public function __construct(int $userId, string $name, string $email, string $password, string $role) {
