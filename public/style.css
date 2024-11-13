@@ -1,0 +1,508 @@
+/* شريط التنقل */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    background-color: #575757;
+}
+
+/* زر تسجيل الخروج */
+.logout-btn {
+    float: right;
+    margin-right: 20px;
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #c82333;
+}
+
+/* تنسيق الرسائل */
+.success {
+    color: green;
+    text-align: center;
+    font-size: 18px;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    font-size: 18px;
+}
+
+/* تنسيق الجدول */
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #333;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+}
+/* شريط التنقل */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    background-color: #575757;
+}
+
+/* تنسيق عنوان الصفحة */
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+}
+
+/* تنسيق عرض الفعاليات كبطاقات */
+.events-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+}
+
+.event-card {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 300px;
+    margin: 15px;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.event-card:hover {
+    transform: scale(1.05);
+}
+
+.event-card h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.event-card p {
+    color: #555;
+    margin: 8px 0;
+}
+
+/* تنسيق زر الحجز */
+.btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+/* تنسيق الرسائل */
+.success {
+    color: green;
+    text-align: center;
+    font-size: 18px;
+}
+
+.error {
+    color: red;
+    text-align: center;
+    font-size: 18px;
+}
+/* تنسيق عنوان الصفحة */
+h1 {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+    width: 100%; /* لضمان أن العنوان يشغل سطر كامل */
+}
+/* شريط التنقل */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    background-color: #575757;
+}
+
+/* تنسيق صفحة الحجز */
+.booking-container {
+    width: 80%;
+    max-width: 400px;
+    margin: 50px auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.booking-container h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.booking-container p {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* تنسيق زر الحجز */
+.btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+    border: none;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+/* تنسيق حقل الإدخال */
+input[type="number"] {
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 16px;
+    width: 100px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+}
+/* شريط التنقل */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    background-color: #575757;
+}
+
+/* تنسيق حاوية صفحة الدفع */
+.payment-container {
+    width: 80%;
+    max-width: 500px;
+    margin: 50px auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.payment-container h1 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.payment-container p {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* تنسيق حقول الدفع */
+.payment-field {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 15px 0;
+}
+
+.payment-field label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.payment-field input {
+    padding: 10px;
+    width: 100%;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 5px;
+}
+
+/* تنسيق زر الدفع */
+button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* إخفاء الحقول */
+#visa_fields, #paypal_fields, #mobo_fields, #account_fields {
+    display: none;
+}
+
+/* تنسيق الرسائل */
+.success {
+    color: green;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.error {
+    color: red;
+    font-size: 18px;
+    margin-top: 20px;
+}
+/* شريط التنقل */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    background-color: #575757;
+}
+
+/* تنسيق حاوية التسجيل */
+.register-container {
+    width: 80%;
+    max-width: 400px;
+    margin: 50px auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.register-container h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.register-container label {
+    font-size: 14px;
+    color: #555;
+    display: block;
+    margin-top: 10px;
+}
+
+.register-container input[type="text"],
+.register-container input[type="email"],
+.register-container input[type="password"] {
+    padding: 10px;
+    margin-top: 5px;
+    font-size: 16px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* زر إنشاء الحساب */
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+/* تنسيق الرسالة عند الخطأ */
+.error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+/* شريط التنقل */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.navbar a {
+    color: white;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    background-color: #575757;
+}
+
+/* تنسيق حاوية تسجيل الدخول */
+.login-container {
+    width: 80%;
+    max-width: 400px;
+    margin: 50px auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.login-container h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.login-container label {
+    font-size: 14px;
+    color: #555;
+    display: block;
+    margin-top: 10px;
+}
+
+.login-container input[type="email"],
+.login-container input[type="password"] {
+    padding: 10px;
+    margin-top: 5px;
+    font-size: 16px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* زر تسجيل الدخول */
+.btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
+
+/* تنسيق الرسالة عند الخطأ */
+.error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
