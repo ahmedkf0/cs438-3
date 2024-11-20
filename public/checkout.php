@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 require_once '../config/db.php';
 require_once '../classes/Booking.php';
@@ -12,10 +13,19 @@ use Classes\Event;
 use Classes\Discount;
 use Classes\Payment;
 
+// التحقق من تسجيل دخول المستخدم
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// الاتصال بقاعدة البيانات
 $db = (new Database())->connect();
 
+// التحقق من معرف الحجز
 if (!isset($_GET['booking_id']) || !is_numeric($_GET['booking_id'])) {
-    die("Booking ID is missing or invalid.");
+    echo "<p class='error'>Booking ID is missing or invalid.</p>";
+    exit();
 }
 
 $bookingId = (int) $_GET['booking_id'];
@@ -27,14 +37,21 @@ $stmt->execute();
 $booking = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$booking) {
-    die("Pending booking not found.");
+    echo "<p class='error'>Pending booking not found.</p>";
+    exit();
 }
 
-
+// جلب بيانات الفعالية
 $event = Event::getEventById($db, $booking['event_id']);
+if (!$event) {
+    echo "<p class='error'>Event not found.</p>";
+    exit();
+}
+
 $originalPrice = (float) $booking['total_price'];
 $numTickets = $booking['num_tickets'];
-// Fetch user details to calculate age and get occupation
+
+// جلب بيانات المستخدم
 $userId = $booking['user_id'];
 $userStmt = $db->prepare("SELECT birthdate, occupation FROM users WHERE user_id = :userId");
 $userStmt->bindParam(':userId', $userId);
@@ -42,97 +59,96 @@ $userStmt->execute();
 $user = $userStmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
-    die("User not found.");
+    echo "<p class='error'>User not found.</p>";
+    exit();
 }
 
-// Calculate age
+// حساب العمر والخصم
 $birthdate = new DateTime($user['birthdate']);
 $today = new DateTime();
 $age = $today->diff($birthdate)->y;
-
-// Get occupation
 $occupation = $user['occupation'];
-// Apply discount based on age and occupation
+
 $discount = new Discount($age, $occupation);
 $discountedPrice = $discount->applyDiscount($originalPrice);
 
+// معالجة الدفع
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $userId = $booking['user_id'];
     $paymentMethod = $_POST['payment_method'];
     $errorMessage = "";
 
-    // التحقق من الحقول المدخلة بناءً على طريقة الدفع
-    if ($paymentMethod === 'visa') {
-        // التحقق من إدخال بيانات الفيزا
-        $cardNumber = $_POST['card_number'] ?? null;
-        $cardExpiry = $_POST['card_expiry'] ?? null;
-        $cardCode = $_POST['card_code'] ?? null;
-        $cardholderName = $_POST['cardholder_name'] ?? null;
-        
-        if (empty($cardNumber) || empty($cardExpiry) || empty($cardCode) || empty($cardholderName)) {
-            $errorMessage = "Please enter all Visa card details: card number, expiry date, CVV, and cardholder name.";
-        } else {
-            $payment = new Payment($bookingId, $paymentMethod, $discountedPrice, 'completed');
-            $paymentSuccess = $payment->processPayment();
-        }
-    } elseif ($paymentMethod === 'paypal') {
-        // التحقق من إدخال بيانات PayPal
-        $paypalEmail = $_POST['paypal_email'] ?? null;
-        $paypalCode = $_POST['paypal_code'] ?? null;
-        
-        if (empty($paypalEmail) || empty($paypalCode)) {
-            $errorMessage = "Please enter both PayPal account email and confirmation code.";
-        } else {
-            $payment = new Payment($bookingId, $paymentMethod, $discountedPrice, 'completed');
-            $paymentSuccess = $payment->processPayment();
-        }
-    } elseif ($paymentMethod === 'mobocash') {
-        // التحقق من إدخال بيانات Mobo Cash
-        $moboAccountNumber = $_POST['mobo_account_number'] ?? null;
-        $moboConfirmationCode = $_POST['mobo_confirmation_code'] ?? null;
-        
-        if (empty($moboAccountNumber) || empty($moboConfirmationCode)) {
-            $errorMessage = "Please enter both Mobo Cash account number and confirmation code.";
-        } else {
-            $payment = new Payment($bookingId, $paymentMethod, $discountedPrice, 'completed');
-            $paymentSuccess = $payment->processPayment();
-        }
-    } elseif ($paymentMethod === 'edfa3li') {
-        $accountNumber = $_POST['account_number'] ?? null;
-        $accountCode = $_POST['account_code'] ?? null;
-        
-        if (empty($accountNumber) || empty($accountCode)) {
-            $errorMessage = "Please enter both the account number and account code.";
-        } else {
-            $payment = new Payment($bookingId, $paymentMethod, $discountedPrice, 'completed');
-            $paymentSuccess = $payment->processPayment();
-        }
-    } else {
-        $errorMessage = "Invalid payment method selected.";
+    // التحقق من طريقة الدفع
+    switch ($paymentMethod) {
+        case 'visa':
+            $cardNumber = $_POST['card_number'] ?? null;
+            $cardExpiry = $_POST['card_expiry'] ?? null;
+            $cardCode = $_POST['card_code'] ?? null;
+            $cardholderName = $_POST['cardholder_name'] ?? null;
+
+            if (empty($cardNumber) || empty($cardExpiry) || empty($cardCode) || empty($cardholderName)) {
+                $errorMessage = "Please enter all Visa card details.";
+            }
+            break;
+
+        case 'paypal':
+            $paypalEmail = $_POST['paypal_email'] ?? null;
+            $paypalCode = $_POST['paypal_code'] ?? null;
+
+            if (empty($paypalEmail) || empty($paypalCode)) {
+                $errorMessage = "Please enter both PayPal account email and confirmation code.";
+            }
+            break;
+
+        case 'mobocash':
+            $moboAccountNumber = $_POST['mobo_account_number'] ?? null;
+            $moboConfirmationCode = $_POST['mobo_confirmation_code'] ?? null;
+
+            if (empty($moboAccountNumber) || empty($moboConfirmationCode)) {
+                $errorMessage = "Please enter both Mobo Cash account number and confirmation code.";
+            }
+            break;
+
+        case 'edfa3li':
+            $accountNumber = $_POST['account_number'] ?? null;
+            $accountCode = $_POST['account_code'] ?? null;
+
+            if (empty($accountNumber) || empty($accountCode)) {
+                $errorMessage = "Please enter both the account number and account code.";
+            }
+            break;
+
+        default:
+            $errorMessage = "Invalid payment method selected.";
     }
 
-    // معالجة الدفع فقط إذا لم تكن هناك رسالة خطأ
-    if (empty($errorMessage) && isset($paymentSuccess) && $paymentSuccess) {
-        // تأكيد الحجز وتحديث المقاعد المتاحة
-        if (Booking::confirmBooking($db, $bookingId)) {
-            $updateSeatsStmt = $db->prepare("UPDATE events SET available_seats = available_seats - :numTickets WHERE event_id = :eventId AND available_seats >= :numTickets");
-            $updateSeatsStmt->bindParam(':numTickets', $numTickets);
-            $updateSeatsStmt->bindParam(':eventId', $booking['event_id']);
-            $updateSeatsStmt->execute();
+    if (empty($errorMessage)) {
+        $payment = new Payment($bookingId, $paymentMethod, $discountedPrice, 'completed');
+        $paymentSuccess = $payment->processPayment();
 
-            // إعادة التوجيه إلى الصفحة الرئيسية بعد إتمام الدفع
-            header("Location: index.php");
-            exit();
+        if ($paymentSuccess) {
+            if (Booking::confirmBooking($db, $bookingId)) {
+                $updateSeatsStmt = $db->prepare("
+                    UPDATE events SET available_seats = available_seats - :numTickets 
+                    WHERE event_id = :eventId AND available_seats >= :numTickets
+                ");
+                $updateSeatsStmt->bindParam(':numTickets', $numTickets);
+                $updateSeatsStmt->bindParam(':eventId', $booking['event_id']);
+                $updateSeatsStmt->execute();
+
+                header("Location: index.php");
+                exit();
+            } else {
+                echo "<p class='error'>Failed to confirm booking.</p>";
+            }
         } else {
-            $errorMessage = "Failed to confirm booking.";
+            echo "<p class='error'>Payment failed. Please try again.</p>";
         }
-    } elseif (!empty($errorMessage)) {
-        echo "<p style='color: red;'>$errorMessage</p>";
     } else {
-        echo "<p style='color: red;'>Payment failed. Please try again.</p>";
+        echo "<p class='error'>$errorMessage</p>";
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ar">

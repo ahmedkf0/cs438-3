@@ -19,14 +19,18 @@ class Booking {
         $this->status = $status;
     }
 
-    public static function createPendingBooking(PDO $db, int $userId, int $eventId, int $numTickets, float $totalPrice): int {
+    public static function createPendingBooking(PDO $db, int $userId, int $eventId, int $numTickets, float $totalPrice, ?int $recipientId = null): int {
         try {
-            $stmt = $db->prepare("INSERT INTO bookings (user_id, event_id, num_tickets, total_price, status) VALUES (:userId, :eventId, :numTickets, :totalPrice, 'Pending')");
+            $stmt = $db->prepare("
+                INSERT INTO bookings (user_id, event_id, num_tickets, total_price, status, recipient_id)
+                VALUES (:userId, :eventId, :numTickets, :totalPrice, 'Pending', :recipientId)
+            ");
             $stmt->bindParam(':userId', $userId);
             $stmt->bindParam(':eventId', $eventId);
             $stmt->bindParam(':numTickets', $numTickets);
             $stmt->bindParam(':totalPrice', $totalPrice);
-            
+            $stmt->bindParam(':recipientId', $recipientId);
+    
             if ($stmt->execute()) {
                 return (int) $db->lastInsertId();
             }
@@ -35,6 +39,8 @@ class Booking {
         }
         return 0;
     }
+    
+    
 
     public static function confirmBooking(PDO $db, int $bookingId): bool {
         try {
@@ -124,4 +130,32 @@ class Booking {
     public function getStatus(): string {
         return $this->status;
     }
+
+    public static function giftBooking(PDO $db, int $bookingId, string $recipientEmail): bool {
+        try {
+            // التحقق من وجود المستلم بالبريد الإلكتروني
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = :email");
+            $stmt->bindParam(':email', $recipientEmail);
+            $stmt->execute();
+            $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if (!$recipient) {
+                throw new Exception("المستلم غير موجود!");
+            }
+    
+            // تحديث الحجز لتعيين معرف المستلم
+            $stmt = $db->prepare("UPDATE bookings SET recipient_id = :recipientId WHERE booking_id = :bookingId");
+            $stmt->bindParam(':recipientId', $recipient['id']);
+            $stmt->bindParam(':bookingId', $bookingId);
+    
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error gifting booking: " . $e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            error_log("Error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
 }

@@ -94,7 +94,7 @@ class Event {
     public static function getEventById(PDO $db, int $eventId): ?array {
         try {
             $stmt = $db->prepare("SELECT * FROM events WHERE event_id = :eventId");
-            $stmt->bindParam(':eventId', $eventId);
+            $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
