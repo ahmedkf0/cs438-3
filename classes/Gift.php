@@ -11,36 +11,26 @@ class Gift {
         $this->db = $db;
     }
 
-    public function createGift(int $bookingId, string $recipientEmail): bool {
+    public function createGiftForEvent($userId, $eventId, $recipientEmail, $totalPrice, $numTickets) {
         try {
-            // التحقق من وجود المستلم بالبريد الإلكتروني
-            $stmt = $this->db->prepare("SELECT id FROM users WHERE email = :email");
-            $stmt->bindParam(':email', $recipientEmail);
-            $stmt->execute();
-            $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$recipient) {
-                throw new Exception("المستلم غير موجود.");
-            }
-
-            // تحديث الحجز لتعيين معرف المستلم
             $stmt = $this->db->prepare("
-                UPDATE bookings 
-                SET recipient_id = :recipientId 
-                WHERE booking_id = :bookingId
+                INSERT INTO gifts (user_id, event_id, recipient_email, total_price, num_tickets)
+                VALUES (:user_id, :event_id, :recipient_email, :total_price, :num_tickets)
             ");
-            $stmt->bindParam(':recipientId', $recipient['id']);
-            $stmt->bindParam(':bookingId', $bookingId);
-
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->bindParam(':event_id', $eventId, PDO::PARAM_INT);
+            $stmt->bindParam(':recipient_email', $recipientEmail, PDO::PARAM_STR);
+            $stmt->bindParam(':total_price', $totalPrice, PDO::PARAM_STR);
+            $stmt->bindParam(':num_tickets', $numTickets, PDO::PARAM_INT);
+    
             return $stmt->execute();
         } catch (PDOException $e) {
-            error_log("Error creating gift: " . $e->getMessage());
-            return false;
-        } catch (Exception $e) {
-            error_log("Error: " . $e->getMessage());
+            error_log("Gift creation failed: " . $e->getMessage());
             return false;
         }
     }
+    
+    
 
     public function getGiftsForRecipient(int $recipientId): array {
         try {
