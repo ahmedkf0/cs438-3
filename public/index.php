@@ -35,6 +35,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_review'])) {
         echo "<p class='error'>حدث خطأ أثناء إضافة المراجعة. حاول مرة أخرى.</p>";
     }
 }
+
+// حذف التقييم عند تقديم طلب الحذف
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_review'])) {
+    $reviewId = (int)$_POST['review_id'];
+    $userId = $_SESSION['user_id'] ?? null;
+
+    if (!$userId) {
+        echo "<p class='error'>يرجى تسجيل الدخول لحذف التقييم.</p>";
+    } elseif ($review->deleteReview($reviewId, $userId)) {
+        echo "<p class='success'>تم حذف التقييم بنجاح.</p>";
+    } else {
+        echo "<p class='error'>حدث خطأ أثناء حذف التقييم. حاول مرة أخرى.</p>";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -94,6 +108,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_review'])) {
                                     <p><strong><?php echo htmlspecialchars($r['user_name']); ?>:</strong> <?php echo htmlspecialchars($r['rating']); ?>/5</p>
                                     <p><?php echo htmlspecialchars($r['review_text']); ?></p>
                                     <small>تمت الإضافة في: <?php echo htmlspecialchars($r['created_at']); ?></small>
+
+                                    <!-- زر الحذف -->
+                                    <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $r['user_id']): ?>
+                                        <form method="POST" action="" class="delete-review-form">
+                                            <input type="hidden" name="review_id" value="<?php echo $r['review_id']; ?>">
+                                            <button type="submit" name="delete_review" class="delete-btn">حذف</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>

@@ -68,4 +68,23 @@ class Review {
             return 0;
         }
     }
+
+    public function deleteReview($reviewId, $userId) {
+        try {
+            // حذف التقييم إذا كان المستخدم هو من أنشأه
+            $stmt = $this->db->prepare("
+                DELETE FROM reviews 
+                WHERE review_id = :review_id AND user_id = :user_id
+            ");
+            $stmt->bindParam(':review_id', $reviewId, PDO::PARAM_INT);
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+    
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error deleting review: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    
 }
