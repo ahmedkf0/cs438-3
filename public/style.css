@@ -55,6 +55,38 @@ table {
     background-color: white;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
+.event-card p strong {
+    font-weight: bold;
+    color: #333;
+}
+
+.event-card p:last-child {
+    font-size: 1.2em;
+    color: #007BFF;
+}
+
+.reviews-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.review {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.review h4 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.review p {
+    margin: 5px 0;
+}
 
 table, th, td {
     border: 1px solid #ddd;
@@ -83,6 +115,116 @@ h1 {
     text-align: center;
     padding: 10px 0;
 }
+
+.reviews-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.review {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.review h4 {
+    margin: 0;
+    font-weight: bold;
+}
+.btn-group {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+.btn {
+    display: inline-block;
+    background: #007BFF;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background: #0056b3;
+}
+
+.gift-btn {
+    background: #28a745;
+}
+
+.gift-btn:hover {
+    background: #1e7e34;
+}
+
+.review p {
+    margin: 5px 0;
+}
+
+.add-review {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.add-review form {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-review label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.add-review textarea {
+    resize: none;
+    margin-bottom: 10px;
+}
+.reviews-container {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.review {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.review p {
+    margin: 5px 0;
+}
+
+.add-review {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.add-review form {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-review textarea {
+    resize: none;
+    margin-bottom: 10px;
+}
+
 
 .navbar a {
     color: white;
