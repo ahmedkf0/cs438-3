@@ -5,10 +5,10 @@ use PDO;
 use PDOException;
 
 class Database {
-    private string $host = 'localhost';
-    private string $db_name = 'event_management'; // تأكد أن هذا الاسم يطابق اسم قاعدة البيانات التي قمت بإنشائها
-    private string $username = 'root'; // اسم المستخدم الخاص بقاعدة البيانات
-    private string $password = ''; // كلمة المرور (عادةً تكون فارغة في إعدادات XAMPP/WAMP الافتراضية)
+    private string $host = 'localhost'; // اسم المضيف
+    private string $db_name = 'event_management'; // اسم قاعدة البيانات
+    private string $username = 'root'; // اسم المستخدم
+    private string $password = ''; // كلمة المرور (فارغة إذا كنت تستخدم XAMPP/WAMP)
     private ?PDO $conn = null;
 
     public function connect(): ?PDO {
@@ -18,7 +18,7 @@ class Database {
         } catch (PDOException $e) {
             echo "Database connection error: " . $e->getMessage();
         }
-
         return $this->conn;
     }
 }
+

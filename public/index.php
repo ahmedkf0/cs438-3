@@ -95,9 +95,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_review'])) {
                     
                     <!-- الأزرار -->
                     <div class="btn-group">
-                        <a class="btn" href="booking.php?event_id=<?php echo $event->getEventId(); ?>">حجز عادي</a>
-                        <a class="btn gift-btn" href="gift_booking.php?event_id=<?php echo $event->getEventId(); ?>">إهداء حجز</a>
-                    </div>
+    <?php if (isset($_SESSION['user_id'])): ?>
+        <a class="btn" href="booking.php?event_id=<?php echo $event->getEventId(); ?>">حجز عادي</a>
+        <a class="btn gift-btn" href="gift_booking.php?event_id=<?php echo $event->getEventId(); ?>">إهداء حجز</a>
+    <?php else: ?>
+        <a class="btn" href="login.php">حجز عادي</a>
+        <a class="btn gift-btn" href="login.php">إهداء حجز</a>
+    <?php endif; ?>
+</div>
+
 
                     <!-- عرض المراجعات -->
                     <div class="reviews-container">
