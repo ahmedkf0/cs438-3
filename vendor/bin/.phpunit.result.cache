@@ -1,0 +1,1 @@
+{"version":1,"defects":{"ReviewTest::testAddReviewSuccess":8,"ReviewTest::testAddReviewWithoutBooking":8,"ReviewTest::testGetReviewsByEvent":8,"ReviewTest::testGetAverageRating":8,"ReviewTest::testDeleteReview":8},"times":[]}

@@ -24,6 +24,10 @@ if (!$event) {
     exit();
 }
 
+// تحويل السعر إلى float لضمان العمليات الحسابية
+$event['price'] = (float) $event['price'];
+$event['available_seats'] = (int) $event['available_seats'];
+
 // التحقق من طريقة الإرسال وإنشاء الحجز
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $numTickets = (int) $_POST['quantity'];
@@ -82,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="booking-container">
         <h1>حجز الفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
-        <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars($event['price']); ?> دينار ليبي</p>
+        <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars(number_format($event['price'], 2)); ?> دينار ليبي</p>
         <p>المقاعد المتاحة: <?php echo htmlspecialchars($event['available_seats']); ?></p>
         <form method="POST" action="booking.php?event_id=<?php echo $eventId; ?>">
             <label for="quantity">عدد التذاكر:</label>

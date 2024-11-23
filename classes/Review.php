@@ -14,6 +14,23 @@ class Review {
     // إضافة تقييم وتعليق
     public function addReview($eventId, $userId, $rating, $reviewText) {
         try {
+            // تحقق من وجود حجز
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) FROM bookings 
+                WHERE event_id = :event_id AND user_id = :user_id
+            ");
+            $stmt->bindParam(':event_id', $eventId, PDO::PARAM_INT);
+            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+    
+            $hasBooking = $stmt->fetchColumn();
+    
+            // إذا لم يكن هناك حجز، قم بإرجاع false
+            if (!$hasBooking) {
+                return false;
+            }
+    
+            // إضافة المراجعة
             $stmt = $this->db->prepare("
                 INSERT INTO reviews (event_id, user_id, rating, review_text)
                 VALUES (:event_id, :user_id, :rating, :review_text)
@@ -22,13 +39,14 @@ class Review {
             $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
             $stmt->bindParam(':rating', $rating, PDO::PARAM_INT);
             $stmt->bindParam(':review_text', $reviewText, PDO::PARAM_STR);
-
+    
             return $stmt->execute();
         } catch (PDOException $e) {
             error_log("Error adding review: " . $e->getMessage());
             return false;
         }
     }
+    
 
     // استرجاع جميع المراجعات لحدث معين
     public function getReviewsByEvent($eventId) {

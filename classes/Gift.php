@@ -32,13 +32,13 @@ class Gift {
     
     
 
-    public function getGiftsForRecipient(int $recipientId): array {
+    public function getGiftsForRecipient(string $recipientEmail): array {
         try {
             $stmt = $this->db->prepare("
-                SELECT * FROM bookings 
-                WHERE recipient_id = :recipientId
+                SELECT * FROM gifts 
+                WHERE recipient_email = :recipientEmail
             ");
-            $stmt->bindParam(':recipientId', $recipientId);
+            $stmt->bindParam(':recipientEmail', $recipientEmail, PDO::PARAM_STR);
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -46,4 +46,6 @@ class Gift {
             return [];
         }
     }
+    
+    
 }

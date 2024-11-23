@@ -68,28 +68,29 @@ class Event {
         try {
             $stmt = $db->query("SELECT * FROM events");
             $eventsData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+    
             $events = [];
             foreach ($eventsData as $eventData) {
                 $events[] = new Event(
-                    $eventData['event_id'],
-                    $eventData['title'],
+                    (int) $eventData['event_id'], // تأكد من تحويل ID إلى int
+                    $eventData['title'], 
                     $eventData['description'],
                     $eventData['date'],
                     $eventData['time'],
                     $eventData['location'],
-                    $eventData['price'],
-                    $eventData['available_seats'],
-                    $eventData['age_restriction']
+                    (float) $eventData['price'], // تحويل السعر إلى float
+                    (int) $eventData['available_seats'], // تحويل المقاعد المتاحة إلى int
+                    (int) $eventData['age_restriction'] // تحويل العمر إلى int
                 );
             }
-
+    
             return $events;
         } catch (Exception $e) {
             echo "<p class='error'>حدث خطأ أثناء جلب الفعاليات: " . $e->getMessage() . "</p>";
             return [];
         }
     }
+    
 
     public static function getEventById(PDO $db, int $eventId): ?array {
         try {
