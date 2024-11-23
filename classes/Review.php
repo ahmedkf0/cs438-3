@@ -86,5 +86,15 @@ class Review {
         }
     }
     
+    public function hasAlreadyReviewed(int $eventId, int $userId): bool {
+        $query = "SELECT COUNT(*) FROM reviews WHERE event_id = :eventId AND user_id = :userId";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+    
+        return $stmt->fetchColumn() > 0;
+    }
+    
     
 }
