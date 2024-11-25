@@ -11,7 +11,8 @@ class Gift {
         $this->db = $db;
     }
 
-    public function createGiftForEvent($userId, $eventId, $recipientEmail, $totalPrice, $numTickets) {
+    public function createGiftForEvent($userId, $eventId, $recipientEmail, $totalPrice, $numTickets)
+    {
         try {
             // تحقق من صحة البريد الإلكتروني
             if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
@@ -41,11 +42,19 @@ class Gift {
             }
     
             // تحقق من وجود الحدث
-            $stmt = $this->db->prepare("SELECT COUNT(*) FROM events WHERE event_id = :event_id");
+            $stmt = $this->db->prepare("SELECT price FROM events WHERE event_id = :event_id");
             $stmt->bindParam(':event_id', $eventId, PDO::PARAM_INT);
             $stmt->execute();
-            if ($stmt->fetchColumn() == 0) {
+            $event = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$event) {
                 error_log("Event not found: $eventId");
+                return false;
+            }
+    
+            // تحقق من عدد التذاكر المتاح
+            $availableTickets = 100; // افتراض وجود عدد ثابت من التذاكر للحدث
+            if ($numTickets > $availableTickets) {
+                error_log("Number of tickets exceeds available limit: $numTickets");
                 return false;
             }
     
@@ -67,6 +76,7 @@ class Gift {
             return false;
         }
     }
+    
     
     
     

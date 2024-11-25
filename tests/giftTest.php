@@ -105,7 +105,24 @@ class GiftTest extends TestCase
     public function testCreateGiftForLargeValues()
     {
         // قيم كبيرة
-        $result = $this->gift->createGiftForEvent(1, 1, 'recipient@example.com', 1000000.00, 1000);
+        $result = $this->gift->createGiftForEvent(1, 1, 'recipient@example.com', 1000000.00, 1);
         $this->assertTrue($result, "Gift creation failed for large values.");
     }
+
+    public function testCreateGiftWithExceedingTickets()
+{
+    // إدخال عدد تذاكر أكبر من الحد المتوفر (افتراض أن الحد هو 100)
+    $userId = 1;
+    $eventId = 1;
+    $recipientEmail = 'recipient@example.com';
+    $totalPrice = 5000.00;
+    $numTickets = 150; // عدد التذاكر أكبر من الحد المتوفر
+
+    // محاولة إنشاء هدية
+    $result = $this->gift->createGiftForEvent($userId, $eventId, $recipientEmail, $totalPrice, $numTickets);
+
+    // التحقق من أن العملية تفشل
+    $this->assertFalse($result, "Gift creation should fail when tickets exceed the available limit.");
+}
+
 }
