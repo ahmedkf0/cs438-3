@@ -53,6 +53,21 @@ class GiftTest extends TestCase
         $this->assertEquals($totalPrice, $giftData['total_price'], "Total price does not match.");
     }
 
+    public function testCreateGiftForEventInvalidData()
+    {
+        // بريد إلكتروني غير صالح
+        $result = $this->gift->createGiftForEvent(1, 1, 'invalid_email', 100.00, 2);
+        $this->assertFalse($result, "Gift creation should fail with invalid email.");
+
+        // عدد تذاكر غير صالح
+        $result = $this->gift->createGiftForEvent(1, 1, 'recipient@example.com', 100.00, -1);
+        $this->assertFalse($result, "Gift creation should fail with negative tickets.");
+
+        // سعر إجمالي غير صالح
+        $result = $this->gift->createGiftForEvent(1, 1, 'recipient@example.com', -50.00, 2);
+        $this->assertFalse($result, "Gift creation should fail with negative total price.");
+    }
+
     public function testGetGiftsForRecipient()
     {
         // إعداد بيانات الهدايا
@@ -67,5 +82,30 @@ class GiftTest extends TestCase
         $this->assertCount(1, $gifts, "Incorrect number of gifts retrieved.");
         $this->assertEquals(1, $gifts[0]['event_id'], "Event ID does not match.");
         $this->assertEquals(100.00, $gifts[0]['total_price'], "Total price does not match.");
+    }
+
+    public function testGetGiftsForNonExistentRecipient()
+    {
+        // التحقق من استرجاع الهدايا لبريد غير موجود
+        $gifts = $this->gift->getGiftsForRecipient('nonexistent@example.com');
+        $this->assertEmpty($gifts, "Gifts should be empty for a nonexistent recipient.");
+    }
+
+    public function testCreateGiftForNonExistentUserOrEvent()
+    {
+        // مستخدم غير موجود
+        $result = $this->gift->createGiftForEvent(999, 1, 'recipient@example.com', 100.00, 2);
+        $this->assertFalse($result, "Gift creation should fail for non-existent user.");
+
+        // حدث غير موجود
+        $result = $this->gift->createGiftForEvent(1, 999, 'recipient@example.com', 100.00, 2);
+        $this->assertFalse($result, "Gift creation should fail for non-existent event.");
+    }
+
+    public function testCreateGiftForLargeValues()
+    {
+        // قيم كبيرة
+        $result = $this->gift->createGiftForEvent(1, 1, 'recipient@example.com', 1000000.00, 1000);
+        $this->assertTrue($result, "Gift creation failed for large values.");
     }
 }
