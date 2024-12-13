@@ -51,8 +51,10 @@ if (!$event) {
 $originalPrice = (float) $booking['total_price'];
 $numTickets = $booking['num_tickets'];
 
+// تحديد المستخدم المعني
+$userId = $booking['recipient_id'] ?: $booking['user_id']; // استخدم recipient_id إذا كان متوفرًا، وإلا استخدم user_id
+
 // جلب بيانات المستخدم
-$userId = $booking['user_id'];
 $userStmt = $db->prepare("SELECT birthdate, occupation FROM users WHERE user_id = :userId");
 $userStmt->bindParam(':userId', $userId);
 $userStmt->execute();
@@ -148,6 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>

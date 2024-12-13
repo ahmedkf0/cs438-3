@@ -63,10 +63,25 @@ class User {
     }
 
     // دالة إنشاء حساب جديد
-    public static function register(PDO $db, $name, $email, $password, $role, $phone_number, $birthdate, $occupation = null) {
+    public static function register(PDO $db, $name, $email, $password, $role, $phone_number, $birthdate, $occupation = null, $referralCode = null) {
         try {
-            $stmt = $db->prepare("INSERT INTO users (name, email, password, role, phone_number, birthdate, occupation) 
-                                  VALUES (:name, :email, :password, :role, :phone_number, :birthdate, :occupation)");
+            // توليد كود إحالة فريد
+            $generatedReferralCode = substr(md5(uniqid($email, true)), 0, 8);
+    
+            // التحقق من كود الإحالة إذا كان موجودًا
+            $referrerId = null;
+            if ($referralCode) {
+                $referrerQuery = $db->prepare("SELECT user_id FROM users WHERE referral_code = :referralCode");
+                $referrerQuery->bindParam(':referralCode', $referralCode);
+                $referrerQuery->execute();
+                if ($referrerQuery->rowCount() > 0) {
+                    $referrerId = $referrerQuery->fetch(PDO::FETCH_ASSOC)['user_id'];
+                }
+            }
+    
+            // إنشاء الحساب الجديد
+            $stmt = $db->prepare("INSERT INTO users (name, email, password, role, phone_number, birthdate, occupation, referral_code) 
+                                  VALUES (:name, :email, :password, :role, :phone_number, :birthdate, :occupation, :referral_code)");
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt->bindParam(':name', $name);
             $stmt->bindParam(':email', $email);
@@ -75,10 +90,80 @@ class User {
             $stmt->bindParam(':phone_number', $phone_number);
             $stmt->bindParam(':birthdate', $birthdate);
             $stmt->bindParam(':occupation', $occupation);
-            return $stmt->execute();
+            $stmt->bindParam(':referral_code', $generatedReferralCode);
+            $stmt->execute();
+    
+            // إذا كان هناك مُحيل، أضف الإحالة إلى جدول الإحالات
+            if ($referrerId) {
+                $referralStmt = $db->prepare("INSERT INTO referrals (referrer_id, referred_email, referred_status) 
+                                              VALUES (:referrer_id, :referred_email, 'pending')");
+                $referralStmt->bindParam(':referrer_id', $referrerId);
+                $referralStmt->bindParam(':referred_email', $email);
+                $referralStmt->execute();
+            }
+    
+            return true;
         } catch (Exception $e) {
             echo "<p class='error'>حدث خطأ أثناء إنشاء الحساب: " . $e->getMessage() . "</p>";
             return false;
         }
     }
+    
+
+    public static function completeReferral(PDO $db, $userId) {
+        try {
+            // استرجاع البريد الإلكتروني للمستخدم
+            $userQuery = $db->prepare("SELECT email FROM users WHERE user_id = :user_id");
+            $userQuery->bindParam(':user_id', $userId);
+            $userQuery->execute();
+            $userEmail = $userQuery->fetch(PDO::FETCH_ASSOC)['email'];
+    
+            // تحديث حالة الإحالة إلى "completed"
+            $referralUpdate = $db->prepare("UPDATE referrals SET referred_status = 'completed' 
+                                            WHERE referred_email = :referred_email");
+            $referralUpdate->bindParam(':referred_email', $userEmail);
+            $referralUpdate->execute();
+    
+            // إضافة نقاط مكافأة للمُحيل
+            $rewardPoints = 10; // نقاط المكافآت
+            $rewardUpdate = $db->prepare("UPDATE users SET reward_points = reward_points + :reward_points 
+                                          WHERE user_id = (SELECT referrer_id FROM referrals WHERE referred_email = :referred_email)");
+            $rewardUpdate->bindParam(':reward_points', $rewardPoints);
+            $rewardUpdate->bindParam(':referred_email', $userEmail);
+            $rewardUpdate->execute();
+    
+            return true;
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء إكمال الإحالة: " . $e->getMessage() . "</p>";
+            return false;
+        }
+    }
+
+    public static function getReferralLink(PDO $db, $userId): ?string {
+        try {
+            $stmt = $db->prepare("SELECT referral_code FROM users WHERE user_id = :user_id");
+            $stmt->bindParam(':user_id', $userId);
+            $stmt->execute();
+            $referralCode = $stmt->fetch(PDO::FETCH_ASSOC)['referral_code'];
+            return "https://example.com/register.php?ref=" . $referralCode;
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء استرجاع رابط الإحالة: " . $e->getMessage() . "</p>";
+            return null;
+        }
+    }
+    
+    public static function getReferrals(PDO $db, $userId): array {
+        try {
+            $stmt = $db->prepare("SELECT referred_email, referred_status, created_at 
+                                  FROM referrals WHERE referrer_id = :referrer_id");
+            $stmt->bindParam(':referrer_id', $userId);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo "<p class='error'>حدث خطأ أثناء استرجاع الإحالات: " . $e->getMessage() . "</p>";
+            return [];
+        }
+    }
+    
+    
 }

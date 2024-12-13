@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = $_SESSION['user_id'];
     $totalPrice = $event['price'] * $numTickets;
     $recipientId = null;
-    
-    // التحقق من صلاحية عدد التذاكر
+
+    // التحقق من صحة عدد التذاكر
     if ($numTickets <= 0) {
         echo "<p class='error'>عدد التذاكر يجب أن يكون أكبر من 0.</p>";
         exit();
@@ -47,64 +47,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // التحقق من صحة البريد الإلكتروني للمستلم
     if (!empty($recipientEmail)) {
         if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
             echo "<p class='error'>البريد الإلكتروني غير صالح.</p>";
             exit();
         }
-    
+
         // البحث عن معرف المستخدم بالبريد الإلكتروني
         $stmt = $db->prepare("SELECT user_id FROM users WHERE email = :email");
         $stmt->bindParam(':email', $recipientEmail);
         $stmt->execute();
         $recipient = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
         if (!$recipient) {
-            echo "<p class='error'>المستلم غير موجود.</p>";
+            echo "<p class='error'>المستلم غير موجود. يرجى التأكد من البريد الإلكتروني.</p>";
             exit();
         }
-    
+
         $recipientId = $recipient['user_id']; // تعيين معرف المستلم
     } else {
-        $recipientId = null; // إذا لم يتم إدخال بريد إلكتروني
+        echo "<p class='error'>يجب إدخال بريد إلكتروني صالح للمستلم لإتمام عملية الحجز كهدية.</p>";
+        exit();
     }
-    
-    
-    // إنشاء حجز
-    $bookingId = Booking::createPendingBooking($db, $userId, $eventId, $numTickets, $totalPrice, $recipientId);
-    
 
-  
+    // إنشاء الحجز
+    $bookingId = Booking::createPendingBooking($db, $recipientId, $eventId, $numTickets, $totalPrice);
+
     if ($bookingId) {
-        // التحقق من البريد الإلكتروني للمستلم إذا تم إدخاله
-        if (!empty($recipientEmail)) {
-            if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
-                echo "<p class='error'>البريد الإلكتروني غير صالح.</p>";
-                exit();
-            }
-            $gift = new Gift($db);
-            $giftSuccess = $gift->createGift($bookingId, $recipientEmail);
+        // تسجيل الحجز كهدية في جدول الهدايا
+        $gift = new Gift($db);
+        $giftSuccess = $gift->createGiftForEvent($userId, $eventId, $recipientEmail, $totalPrice, $numTickets);
 
-            if (!$giftSuccess) {
-                echo "<div class='error-message'>فشل في إهداء الحجز. الرجاء المحاولة مرة أخرى.</div>";
-            } else {
-                echo "<div class='success-message'>تم إهداء الحجز بنجاح!</div>";
-            }
+        if (!$giftSuccess) {
+            echo "<div class='error-message'>فشل في تسجيل الحجز كهدية. يرجى المحاولة مرة أخرى.</div>";
+            exit();
+        } else {
+            echo "<div class='success-message'>تم تسجيل الحجز كهدية بنجاح!</div>";
         }
 
-        // تحديث المقاعد المتاحة
+        // تحديث عدد المقاعد المتاحة
         $updateSeatsStmt = $db->prepare("UPDATE events SET available_seats = available_seats - :numTickets WHERE event_id = :eventId");
         $updateSeatsStmt->bindParam(':numTickets', $numTickets, PDO::PARAM_INT);
         $updateSeatsStmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
         $updateSeatsStmt->execute();
 
-        // التوجيه إلى checkout.php
+        // التوجيه إلى صفحة التأكيد
         header("Location: checkout.php?booking_id=$bookingId");
         exit();
     } else {
-        echo "<div class='error-message'>فشل في إنشاء الحجز. الرجاء المحاولة مرة أخرى.</div>";
+        echo "<div class='error-message'>فشل في إنشاء الحجز. يرجى المحاولة مرة أخرى.</div>";
     }
 }
+
+
+
+
 ?>
 
 <!DOCTYPE html>

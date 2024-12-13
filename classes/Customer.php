@@ -149,5 +149,47 @@ class Customer extends User {
     
         return $booking;
     }
+
+    // إضافة نظام الإحالة في Customer.php
+public function referFriend(PDO $db, int $friendId): bool {
+    try {
+        // تحقق إذا كان العميل الحالي لديه دعوة سابقة لنفس الصديق
+        $stmt = $db->prepare("SELECT COUNT(*) FROM referrals WHERE referrer_id = :referrerId AND friend_id = :friendId");
+        $stmt->bindParam(':referrerId', $this->userId, PDO::PARAM_INT);
+        $stmt->bindParam(':friendId', $friendId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        if ($stmt->fetchColumn() > 0) {
+            throw new Exception("لقد قمت بالفعل بدعوة هذا الصديق.");
+        }
+
+        // إدراج إحالة جديدة
+        $stmt = $db->prepare("INSERT INTO referrals (referrer_id, friend_id, created_at) VALUES (:referrerId, :friendId, NOW())");
+        $stmt->bindParam(':referrerId', $this->userId, PDO::PARAM_INT);
+        $stmt->bindParam(':friendId', $friendId, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (Exception $e) {
+        error_log("Error in referFriend: " . $e->getMessage());
+        return false;
+    }
+}
+
+// عرض جميع الإحالات التي قام بها العميل
+public function viewReferrals(PDO $db): array {
+    try {
+        $stmt = $db->prepare("SELECT users.name AS friend_name, referrals.created_at AS referral_date
+                              FROM referrals
+                              JOIN users ON referrals.friend_id = users.user_id
+                              WHERE referrals.referrer_id = :referrerId
+                              ORDER BY referrals.created_at DESC");
+        $stmt->bindParam(':referrerId', $this->userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Error in viewReferrals: " . $e->getMessage());
+        return [];
+    }
+}
+
     
 }

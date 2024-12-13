@@ -31,6 +31,7 @@ $event['available_seats'] = (int) $event['available_seats'];
 // التحقق من طريقة الإرسال وإنشاء الحجز
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $numTickets = (int) $_POST['quantity'];
+    $referralCode = $_POST['referral_code'] ?? null; // كود الإحالة (اختياري)
     $userId = $_SESSION['user_id'];
     $totalPrice = $event['price'] * $numTickets;
 
@@ -43,6 +44,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($numTickets > $event['available_seats']) {
         echo "<p class='error'>عدد التذاكر المطلوب يتجاوز عدد المقاعد المتاحة.</p>";
         exit();
+    }
+
+    // التحقق من كود الإحالة إذا كان موجودًا
+    if ($referralCode) {
+        $stmt = $db->prepare("SELECT user_id FROM users WHERE referral_code = :referralCode");
+        $stmt->bindParam(':referralCode', $referralCode, PDO::PARAM_STR);
+        $stmt->execute();
+        $referrerId = $stmt->fetch(PDO::FETCH_ASSOC)['user_id'] ?? null;
+
+        // تسجيل الإحالة إذا كان كود الإحالة صحيحًا
+        if ($referrerId && $referrerId != $userId) {
+            $stmt = $db->prepare("INSERT INTO referrals (referrer_id, referred_email, referred_status) 
+                                  VALUES (:referrerId, (SELECT email FROM users WHERE user_id = :userId), 'pending')");
+            $stmt->bindParam(':referrerId', $referrerId, PDO::PARAM_INT);
+            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+            $stmt->execute();
+        }
     }
 
     // إنشاء حجز
@@ -91,7 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST" action="booking.php?event_id=<?php echo $eventId; ?>">
             <label for="quantity">عدد التذاكر:</label>
             <input type="number" name="quantity" id="quantity" min="1" required>
+            <br>
             
+            <!-- حقل كود الإحالة -->
+            <label for="referral_code">كود الإحالة (اختياري):</label>
+            <input type="text" name="referral_code" id="referral_code">
+            <br>
+
             <button type="submit">احجز الآن</button>
         </form>
     </div>
