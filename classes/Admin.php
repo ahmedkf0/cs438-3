@@ -1,18 +1,38 @@
 <?php
 
-require_once 'User.php';
+include_once('User.php');
 require_once 'Event.php';
 
+class User {
+    private int $userId;
+    private string $name;
+    private string $email;
+    private string $password;
+    private string $role;
+    private ?string $birthdate;
+
+    public function __construct(int $userId, string $name, string $email, string $password, string $role, ?string $birthdate = null) {
+        $this->userId = $userId;
+        $this->name = $name;
+        $this->email = $email;
+        $this->password = $password;
+        $this->role = $role;
+        $this->birthdate = $birthdate ?? '';
+    }
+}
 
 class Admin extends User {
+    private $db; // تعريف خاصية db هنا
+
     // Constructor
-    public function __construct($userId, $name, $email, $phoneNumber, $birthdate, $password) {
+    public function __construct($userId, $name, $email, $phoneNumber, $birthdate, $password, $conn) {
         parent::__construct($userId, $name, $email, $phoneNumber, $birthdate, $password);
+        $this->db = $conn; // تخزين الاتصال بقاعدة البيانات
     }
 
     // Method to login
-    public function login($conn, $name, $password) {
-        $stmt = $conn->prepare("SELECT * FROM users WHERE name = :name AND password = :password");
+    public function login($name, $password) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE name = :name AND password = :password");
         $stmt->execute(['name' => $name, 'password' => $password]);
         $user = $stmt->fetch(PDO::FETCH_OBJ);
     
@@ -30,197 +50,138 @@ class Admin extends User {
             exit();
         }
     }
-    // Additional methods specific to Admin can be added here 
 
-
-
-
-  
-    
-    public function insertEvent($conn) {
-        if ($this->validate()) {
-            try {
-                $sql = "INSERT INTO events (event_id, title, description, date, time, location, price, available_seats, age_restriction) VALUES (:event_id, :title, :description, :date, :time, :location, :price, :available_seats, :age_restriction)";
-                $stmt = $conn->prepare($sql);
-    
-                // تخزين القيم في متغيرات
-                $eventId = $this->getEventId();
-                $title = $this->getTitle();
-                $description = $this->getDescription();
-                $date = $this->getDate();
-                $time = $this->getTime();
-                $location = $this->getLocation();
-                $price = $this->getPrice();
-                $availableSeats = $this->getAvailableSeats();
-                $ageRestriction = $this->getAgeRestriction();
-    
-                // تمرير المتغيرات إلى bindParam
-                $stmt->bindParam(':event_id', $eventId);
-                $stmt->bindParam(':title', $title);
-                $stmt->bindParam(':description', $description);
-                $stmt->bindParam(':date', $date);
-                $stmt->bindParam(':time', $time);
-                $stmt->bindParam(':location', $location);
-                $stmt->bindParam(':price', $price);
-                $stmt->bindParam(':available_seats', $availableSeats);
-                $stmt->bindParam(':age_restriction', $ageRestriction);
-    
-                $stmt->execute();
-                return "<div class='success-message'>تم إضافة الحدث</div>";
-            } catch(PDOException $e) {
-                return "<div class='error-message'>حدث خطأ: " . $e->getMessage() . "</div>";
-            }
+    // Method to update user data
+    public function updateUser($userId, $data) {
+        // تحضير استعلام SQL لتحديث بيانات المستخدم
+        if (!empty($data['password'])) {
+            // استخدم كلمة المرور كما هي دون تشفير
+            $password = $data['password']; // كلمة المرور النصية
+            $sql = "UPDATE users SET 
+                    name = :name, 
+                    email = :email, 
+                    phone_number = :phone_number, 
+                    password = :password, 
+                    birthdate = :birthdate, 
+                    role = :role 
+                    WHERE user_id = :user_id";
         } else {
-            return "<div class='error-message'>التحقق من البيانات فشل. يرجى التحقق من المدخلات.</div>";
+            $sql = "UPDATE users SET 
+                    name = :name, 
+                    email = :email, 
+                    phone_number = :phone_number, 
+                    role = :role 
+                    WHERE user_id = :user_id";
         }
+    
+        // تحضير الاستعلام
+        $stmt = $this->db->prepare($sql);
+    
+        // ربط القيم
+        $stmt->bindParam(':name', $data['name']);
+        $stmt->bindParam(':email', $data['email']);
+        $stmt->bindParam(':phone_number', $data['phone_number']);
+        $stmt->bindParam(':user_id', $userId);
+        $stmt->bindParam(':role', $data['role']);
+    
+        // ربط كلمة المرور فقط إذا كانت موجودة
+        if (!empty($data['password'])) {
+            $stmt->bindParam(':password', $password); // استخدام كلمة المرور النصية
+        }
+    
+        // ربط تاريخ الميلاد فقط إذا كان موجودًا
+        if (!empty($data['birthdate'])) {
+            $stmt->bindParam(':birthdate', $data['birthdate']);
+        }
+    
+        // تنفيذ الاستعلام
+        return $stmt->execute();
     }
-    public function deleteEvent($conn) {
+
+    public function deleteUserWithReferences($userId) {
         try {
-            // بدء المعاملة
-            $conn->beginTransaction();
-
-            // حذف التذاكر المرتبطة
-            $ticketStmt = $conn->prepare("DELETE FROM tickets WHERE event_id = :event_id");
-            $ticketStmt->execute(['event_id' => $this->event_id]);
-
-            // حذف الخصومات المرتبطة
-            $discountStmt = $conn->prepare("DELETE FROM discount WHERE event_id = :event_id");
-            $discountStmt->execute(['event_id' => $this->event_id]);
-
-            // حذف الحجوزات المرتبطة
-            $bookingStmt = $conn->prepare("DELETE FROM bookings WHERE event_id = :event_id");
-            $bookingStmt->execute(['event_id' => $this->event_id]);
-
-            // الحصول على booking_ids المرتبطة بهذا event_id
-            $bookingIds = $conn->prepare("SELECT booking_id FROM bookings WHERE event_id = :event_id");
-            $bookingIds->execute(['event_id' => $this->event_id]);
-            $bookingIdsArray = $bookingIds->fetchAll(PDO::FETCH_COLUMN);
-
-            // حذف طرق الدفع المرتبطة
-            if (!empty($bookingIdsArray)) {
-                $placeholders = implode(',', array_fill(0, count($bookingIdsArray), '?'));
-                $paymentStmt = $conn->prepare("DELETE FROM payments WHERE booking_id IN ($placeholders)");
-                $paymentStmt->execute($bookingIdsArray);
-            }
-
-            // حذف الحدث نفسه
-            $eventStmt = $conn->prepare("DELETE FROM events WHERE event_id = :event_id");
-            $eventStmt->execute(['event_id' => $this->event_id]);
-
-            // التحقق من نجاح العملية
-            $conn->commit();
-            return "The event has been deleted.";
+            // بداية المعاملة
+            $this->db->beginTransaction();
+    
+            // حذف بيانات الحجوزات
+            $sqlBookings = "DELETE FROM bookings WHERE user_id = :user_id";
+            $stmtBookings = $this->db->prepare($sqlBookings);
+            $stmtBookings->bindParam(':user_id', $userId);
+            $stmtBookings->execute();
+    
+            // حذف بيانات الدفع المرتبطة بالحجوزات
+            $sqlPayments = "DELETE FROM payments WHERE booking_id IN (SELECT booking_id FROM bookings WHERE user_id = :user_id)";
+            $stmtPayments = $this->db->prepare($sqlPayments);
+            $stmtPayments->bindParam(':user_id', $userId);
+            $stmtPayments->execute();
+    
+            // حذف بيانات الهدايا
+            $sqlGifts = "DELETE FROM gifts WHERE user_id = :user_id";
+            $stmtGifts = $this->db->prepare($sqlGifts);
+            $stmtGifts->bindParam(':user_id', $userId);
+            $stmtGifts->execute();
+    
+            // حذف التذاكر المرتبطة بالمستخدم
+            $sqlTickets = "DELETE FROM tickets WHERE user_id = :user_id";
+            $stmtTickets = $this->db->prepare($sqlTickets);
+            $stmtTickets->bindParam(':user_id', $userId);
+            $stmtTickets->execute();
+    
+            // حذف المستخدم
+            $sqlUser = "DELETE FROM users WHERE user_id = :user_id";
+            $stmtUser = $this->db->prepare($sqlUser);
+            $stmtUser->bindParam(':user_id', $userId);
+            $stmtUser->execute();
+    
+            // إذا تم كل شيء بنجاح، قم بتأكيد المعاملة
+            $this->db->commit();
+            return true;
         } catch (Exception $e) {
-            // التراجع عن المعاملة في حالة حدوث خطأ
-            $conn->rollBack();
-            return "حدث خطأ أثناء الحذف: " . $e->getMessage();
+            // في حالة حدوث خطأ، قم بالتراجع عن المعاملة
+            $this->db->rollBack();
+            // تسجيل الخطأ
+            error_log($e->getMessage()); // سجل الخطأ في ملف السجل
+            return false;
         }
     }
 
-    // دالة لجلب جميع الأحداث
-    public static function fetchAllEvents($conn) {
-        $stmt = $conn->prepare("SELECT event_id, title, description, date, time FROM events");
+        // دالة للبحث عن مستخدم بواسطة الاسم
+        public function getUserByName($name) {
+            $sql = "SELECT * FROM users WHERE name LIKE :name LIMIT 1";
+            $stmt = $this->db->prepare($sql);
+            $searchTerm = '%' . $name . '%';
+            $stmt->bindParam(':name', $searchTerm);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+    
+            // دالة للبحث عن مستخدم بواسطة ID
+    public function getUserById($userId) {
+        // تأكد من أن لديك اتصال قاعدة البيانات متاحًا
+        if (!isset($this->db)) {
+            throw new Exception("Database connection not initialized.");
+        }
+    
+        // تحضير استعلام SQL للبحث عن المستخدم
+        $sql = "SELECT * FROM users WHERE user_id = :user_id LIMIT 1";
+    
+        // تحضير الاستعلام
+        $stmt = $this->db->prepare($sql);
+        
+        // ربط القيمة
+        $stmt->bindParam(':user_id', $userId);
+        
+        // تنفيذ الاستعلام
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // إرجاع نتائج المستخدم كصف مصفوفة
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
     }
 
-     // تحميل بيانات الحدث من الجلسة
-     private function loadEventData() {
-        if (isset($_SESSION['event_data'])) {
-            $event_data = $_SESSION['event_data']; // استرجاع بيانات الحدث
-            ($_SESSION['event_data']); // مسح بيانات الحدث من الجلسة بعد استخدامها
-            
-            // تعيين القيم إلى الخصائص
-            $this->event_id = $event_data['event_id'];
-            $this->title = $event_data['title'];
-            $this->description = $event_data['description'];
-            $this->date = $event_data['date'];
-            $this->time = $event_data['time'];
-            $this->location = $event_data['location'];
-            $this->price = $event_data['price'];
-            $this->available_seats = $event_data['available_seats'];
-            $this->age_restriction = $event_data['age_restriction'];
-        } else {
-            $_SESSION['error_message'] = "يجب البحث عن حدث أولاً."; // رسالة خطأ إذا لم توجد بيانات
-            header('Location: searchevent.php'); // إعادة توجيه إلى صفحة البحث
-            exit();
-        }
-    }
-    public function setEventId($event_id) {
-        $this->event_id = $event_id;
-    }
-    // تحديث الحدث في قاعدة البيانات
-    public function updateEvent() {
-        if (isset($_POST['updateevent'])) {
-            $event_id = $_POST['event_id']; // استرجاع event_id من النموذج
-    
-            // تحديث الحدث في قاعدة البيانات
-            $stmt = $this->conn->prepare("UPDATE events SET title = ?, description = ?, date = ?, time = ?, location = ?, price = ?, available_seats = ?, age_restriction = ? WHERE event_id = ?");
-            $updated = $stmt->execute([
-                $_POST['title'],
-                $_POST['description'],
-                $_POST['date'],
-                $_POST['time'],
-                $_POST['location'],
-                $_POST['price'],
-                $_POST['available_seats'],
-                $_POST['age_restriction'],
-                $event_id // استخدام event_id من البيانات المستلمة
-            ]);
 
-            if ($updated) {
-                $_SESSION['success_message'] = "تم تحديث الحدث بنجاح.";
-                header('Location: editevent.php'); // إعادة توجيه بعد التحديث
-                exit();
-            } else {
-                $this->message = "<div class='error-message'>حدث خطأ أثناء تحديث الحدث.</div>";
-            }
-        }
-    }
-
-    // عرض الرسالة إذا كانت موجودة
-    public function displayMessage() {
-        if (isset($_SESSION['error_message'])) {
-            $this->message = "<div class='error-message'>" . $_SESSION['error_message'] . "</div>";
-            unset($_SESSION['error_message']); // مسح رسالة الخطأ بعد استخدامها
-        } elseif (isset($_SESSION['success_message'])) {
-            $this->message = "<div class='success-message'>" . $_SESSION['success_message'] . "</div>";
-            unset($_SESSION['success_message']); // مسح رسالة النجاح بعد استخدامها
-        }
-        return $this->message;
-    }
-    
     
 
-    private function validate() {
-        if (empty($this->event_id) || !ctype_digit($this->event_id)) {
-            return false;
-        }
-        if (empty($this->title) || strlen($this->title) < 3) {
-            return false;
-        }
-        if (empty($this->description) || strlen($this->description) < 10) {
-            return false;
-        }
-        if (empty($this->date) || !preg_match('/\d{4}-\d{2}-\d{2}/', $this->date)) {
-            return false;
-        }
-        if (empty($this->time)) {
-            return false;
-        }
-        if (empty($this->location)) {
-            return false;
-        }
-        if (empty($this->price) || !is_numeric($this->price) || $this->price < 0) {
-            return false;
-        }
-        if (empty($this->available_seats) || !ctype_digit($this->available_seats) || $this->available_seats < 0) {
-            return false;
-        }
-        if (empty($this->age_restriction) || !ctype_digit($this->age_restriction) || $this->age_restriction < 0) {
-            return false;
-        }
-        return true;
-    }
-}
+
 ?>
