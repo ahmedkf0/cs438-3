@@ -46,6 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    // جلب النقاط الحالية للمستخدم
+    $stmt = $db->prepare("SELECT reward_points FROM users WHERE user_id = :userId");
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $userPoints = $stmt->fetch(PDO::FETCH_ASSOC)['reward_points'] ?? 0;
+
+    // حساب الخصم بناءً على النقاط
+    $discountPercentage = floor($userPoints / 50) * 5; // كل 50 نقطة تساوي 5% خصم
+    $discountPercentage = min($discountPercentage, 50); // الحد الأقصى للخصم 50%
+    $discountAmount = ($totalPrice * $discountPercentage) / 100;
+    $totalPriceAfterDiscount = $totalPrice - $discountAmount;
+
     // التحقق من كود الإحالة إذا كان موجودًا
     if ($referralCode) {
         $stmt = $db->prepare("SELECT user_id FROM users WHERE referral_code = :referralCode");
@@ -64,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // إنشاء حجز
-    $bookingId = Booking::createPendingBooking($db, $userId, $eventId, $numTickets, $totalPrice);
+    $bookingId = Booking::createPendingBooking($db, $userId, $eventId, $numTickets, $totalPriceAfterDiscount);
 
     if ($bookingId) {
         // تحديث المقاعد المتاحة
@@ -73,6 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateSeatsStmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
         $updateSeatsStmt->execute();
 
+        // خصم النقاط المستخدمة
+        $usedPoints = ($discountPercentage / 5) * 50;
+        $updatePointsStmt = $db->prepare("UPDATE users SET reward_points = reward_points - :usedPoints WHERE user_id = :userId");
+        $updatePointsStmt->bindParam(':usedPoints', $usedPoints, PDO::PARAM_INT);
+        $updatePointsStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $updatePointsStmt->execute();
+
         // التوجيه إلى checkout.php
         header("Location: checkout.php?booking_id=$bookingId");
         exit();
@@ -80,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "<div class='error-message'>فشل في إنشاء الحجز. الرجاء المحاولة مرة أخرى.</div>";
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -102,23 +122,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
     </div>
 
-    <div class="booking-container">
-        <h1>حجز الفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
-        <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars(number_format($event['price'], 2)); ?> دينار ليبي</p>
-        <p>المقاعد المتاحة: <?php echo htmlspecialchars($event['available_seats']); ?></p>
-        <form method="POST" action="booking.php?event_id=<?php echo $eventId; ?>">
-            <label for="quantity">عدد التذاكر:</label>
-            <input type="number" name="quantity" id="quantity" min="1" required>
-            <br>
-            
-            <!-- حقل كود الإحالة -->
-            <label for="referral_code">كود الإحالة (اختياري):</label>
-            <input type="text" name="referral_code" id="referral_code">
-            <br>
+   <div class="booking-container">
+    <h1>حجز الفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
+    <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars(number_format($event['price'], 2)); ?> دينار ليبي</p>
+    <p>المقاعد المتاحة: <?php echo htmlspecialchars($event['available_seats']); ?></p>
 
-            <button type="submit">احجز الآن</button>
-        </form>
-    </div>
+    <?php
+    // جلب النقاط الحالية للمستخدم
+    if (isset($_SESSION['user_id'])) {
+        $stmt = $db->prepare("SELECT reward_points FROM users WHERE user_id = :userId");
+        $stmt->bindParam(':userId', $_SESSION['user_id'], PDO::PARAM_INT);
+        $stmt->execute();
+        $userPoints = $stmt->fetch(PDO::FETCH_ASSOC)['reward_points'] ?? 0;
+        $discountPercentage = floor($userPoints / 50) * 5;
+        $discountPercentage = min($discountPercentage, 50); // الحد الأقصى للخصم 50%
+        echo "<p>النقاط المتاحة: <strong>{$userPoints}</strong> نقطة</p>";
+        echo "<p>يمكنك الحصول على خصم يصل إلى: <strong>{$discountPercentage}%</strong></p>";
+    }
+    ?>
+
+    <form method="POST" action="booking.php?event_id=<?php echo $eventId; ?>">
+        <label for="quantity">عدد التذاكر:</label>
+        <input type="number" name="quantity" id="quantity" min="1" required>
+        <br>
+
+        <!-- حقل كود الإحالة -->
+        <label for="referral_code">كود الإحالة (اختياري):</label>
+        <input type="text" name="referral_code" id="referral_code">
+        <br>
+
+        <button type="submit">احجز الآن</button>
+    </form>
+</div>
 
 </body>
 </html>

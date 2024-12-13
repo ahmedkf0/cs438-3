@@ -94,13 +94,32 @@ class User {
             $stmt->execute();
     
             // إذا كان هناك مُحيل، أضف الإحالة إلى جدول الإحالات
-            if ($referrerId) {
-                $referralStmt = $db->prepare("INSERT INTO referrals (referrer_id, referred_email, referred_status) 
-                                              VALUES (:referrer_id, :referred_email, 'pending')");
-                $referralStmt->bindParam(':referrer_id', $referrerId);
-                $referralStmt->bindParam(':referred_email', $email);
-                $referralStmt->execute();
+            // التحقق من كود الإحالة أثناء التسجيل
+            if (!empty($_POST['referral_code'])) {
+                $referralCode = $_POST['referral_code'];
+            
+                // جلب صاحب كود الإحالة
+                $stmt = $db->prepare("SELECT user_id FROM users WHERE referral_code = :referralCode");
+                $stmt->bindParam(':referralCode', $referralCode, PDO::PARAM_STR);
+                $stmt->execute();
+                $referrerId = $stmt->fetch(PDO::FETCH_ASSOC)['user_id'] ?? null;
+            
+                if ($referrerId) {
+                    // زيادة النقاط للمحيل
+                    $updatePointsStmt = $db->prepare("UPDATE users SET reward_points = reward_points + 10 WHERE user_id = :referrerId");
+                    $updatePointsStmt->bindParam(':referrerId', $referrerId, PDO::PARAM_INT);
+                    $updatePointsStmt->execute();
+            
+                    // تسجيل الإحالة في جدول الإحالات
+                    $insertReferralStmt = $db->prepare("INSERT INTO referrals (referrer_id, referred_email, referred_status) 
+                                                        VALUES (:referrerId, :email, 'approved')");
+                    $insertReferralStmt->bindParam(':referrerId', $referrerId, PDO::PARAM_INT);
+                    $insertReferralStmt->bindParam(':email', $email, PDO::PARAM_STR);
+                    $insertReferralStmt->execute();
+                }
             }
+            
+
     
             return true;
         } catch (Exception $e) {

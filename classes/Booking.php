@@ -19,6 +19,18 @@ class Booking {
         $this->status = $status;
     }
 
+    public static function addReferralPoints(PDO $db, int $referrerId, int $points): bool {
+        try {
+            $stmt = $db->prepare("UPDATE users SET reward_points = reward_points + :points WHERE user_id = :referrerId");
+            $stmt->bindParam(':points', $points, PDO::PARAM_INT);
+            $stmt->bindParam(':referrerId', $referrerId, PDO::PARAM_INT);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error updating referral points: " . $e->getMessage());
+            return false;
+        }
+    }
+    
     public static function createPendingBooking(PDO $db, int $userId, int $eventId, int $numTickets, float $totalPrice, ?int $recipientId = null): int {
         try {
             $stmt = $db->prepare("

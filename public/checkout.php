@@ -55,7 +55,7 @@ $numTickets = $booking['num_tickets'];
 $userId = $booking['recipient_id'] ?: $booking['user_id']; // استخدم recipient_id إذا كان متوفرًا، وإلا استخدم user_id
 
 // جلب بيانات المستخدم
-$userStmt = $db->prepare("SELECT birthdate, occupation FROM users WHERE user_id = :userId");
+$userStmt = $db->prepare("SELECT birthdate, occupation, reward_points FROM users WHERE user_id = :userId");
 $userStmt->bindParam(':userId', $userId);
 $userStmt->execute();
 $user = $userStmt->fetch(PDO::FETCH_ASSOC);
@@ -65,14 +65,29 @@ if (!$user) {
     exit();
 }
 
-// حساب العمر والخصم
+// حساب العمر والخصم بناءً على العمر والوظيفة
 $birthdate = new DateTime($user['birthdate']);
 $today = new DateTime();
 $age = $today->diff($birthdate)->y;
 $occupation = $user['occupation'];
 
+// النقاط المكتسبة
+$rewardPoints = $user['reward_points'] ?? 0;
+
+// حساب الخصم بناءً على النقاط
+$discountPercentageFromPoints = floor($rewardPoints / 50) * 5; // 5% لكل 50 نقطة
+$discountPercentageFromPoints = min($discountPercentageFromPoints, 50); // الحد الأقصى 50%
+
+// حساب الخصم الإجمالي
 $discount = new Discount($age, $occupation);
 $discountedPrice = $discount->applyDiscount($originalPrice);
+
+// إضافة الخصم من النقاط
+$additionalDiscount = ($originalPrice * $discountPercentageFromPoints) / 100;
+$finalPrice = $discountedPrice - $additionalDiscount;
+
+// نقاط تم استخدامها
+$pointsUsed = ($discountPercentageFromPoints / 5) * 50;
 
 // معالجة الدفع
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -124,11 +139,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errorMessage)) {
-        $payment = new Payment($bookingId, $paymentMethod, $discountedPrice, 'completed');
+        $payment = new Payment($bookingId, $paymentMethod, $finalPrice, 'completed');
         $paymentSuccess = $payment->processPayment();
 
         if ($paymentSuccess) {
             if (Booking::confirmBooking($db, $bookingId)) {
+                // تحديث المقاعد المتاحة
                 $updateSeatsStmt = $db->prepare("
                     UPDATE events SET available_seats = available_seats - :numTickets 
                     WHERE event_id = :eventId AND available_seats >= :numTickets
@@ -136,6 +152,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $updateSeatsStmt->bindParam(':numTickets', $numTickets);
                 $updateSeatsStmt->bindParam(':eventId', $booking['event_id']);
                 $updateSeatsStmt->execute();
+
+                // خصم النقاط المستخدمة
+                if ($pointsUsed > 0) {
+                    $updatePointsStmt = $db->prepare("UPDATE users SET reward_points = reward_points - :pointsUsed WHERE user_id = :userId");
+                    $updatePointsStmt->bindParam(':pointsUsed', $pointsUsed, PDO::PARAM_INT);
+                    $updatePointsStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+                    $updatePointsStmt->execute();
+                }
 
                 header("Location: index.php");
                 exit();
@@ -150,6 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 
 
 
@@ -183,63 +208,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="payment-container">
-        <h1>إتمام عملية الدفع للفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
-        <p>عدد التذاكر: <?php echo htmlspecialchars($numTickets); ?></p>
-        <p>السعر الأصلي: <?php echo htmlspecialchars($originalPrice); ?> دينار ليبي</p>
-        <p>السعر بعد الخصم: <?php echo htmlspecialchars($discountedPrice); ?> دينار ليبي</p>
-        
-        <form method="POST" action="checkout.php?booking_id=<?php echo $bookingId; ?>">
-            <div class="payment-field">
-                <label for="payment_method">طريقة الدفع:</label>
-                <select name="payment_method" id="payment_method" onchange="togglePaymentFields()">
-                    <option value="visa">Visa</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="mobocash">Mobo Cash</option>
-                    <option value="edfa3li">ادفع لي</option>
-                </select>
-            </div>
-            
-            <div id="visa_fields" class="payment-field">
-                <label for="card_number">رقم البطاقة:</label>
-                <input type="text" name="card_number" id="card_number" placeholder="أدخل رقم البطاقة">
-                
-                <label for="card_expiry">تاريخ انتهاء الصلاحية:</label>
-                <input type="text" name="card_expiry" id="card_expiry" placeholder="MM/YY">
+    <h1>إتمام عملية الدفع للفعالية: <?php echo htmlspecialchars($event['title']); ?></h1>
+    <p>عدد التذاكر: <?php echo htmlspecialchars($numTickets); ?></p>
+    <p>السعر الأصلي للتذكرة: <?php echo htmlspecialchars(number_format($event['price'], 2)); ?> دينار ليبي</p>
+    <p>إجمالي السعر الأصلي: <?php echo htmlspecialchars(number_format($originalPrice, 2)); ?> دينار ليبي</p>
+    <p>الخصم بناءً على العمر والوظيفة: <?php echo htmlspecialchars(number_format($originalPrice - $discountedPrice, 2)); ?> دينار ليبي</p>
+    <p>الخصم بناءً على النقاط: <?php echo htmlspecialchars(number_format($additionalDiscount, 2)); ?> دينار ليبي</p>
+    <p><strong>السعر النهائي بعد الخصم: <?php echo htmlspecialchars(number_format($finalPrice, 2)); ?> دينار ليبي</strong></p>
 
-                <label for="card_code">رمز CVV:</label>
-                <input type="text" name="card_code" id="card_code" placeholder="أدخل رمز CVV">
-                
-                <label for="cardholder_name">اسم حامل البطاقة:</label>
-                <input type="text" name="cardholder_name" id="cardholder_name" placeholder="أدخل اسم حامل البطاقة">
-            </div>
+    <form method="POST" action="checkout.php?booking_id=<?php echo $bookingId; ?>">
+        <div class="payment-field">
+            <label for="payment_method">طريقة الدفع:</label>
+            <select name="payment_method" id="payment_method" onchange="togglePaymentFields()">
+                <option value="visa">Visa</option>
+                <option value="paypal">PayPal</option>
+                <option value="mobocash">Mobo Cash</option>
+                <option value="edfa3li">ادفع لي</option>
+            </select>
+        </div>
 
-            <div id="paypal_fields" class="payment-field">
-                <label for="paypal_email">البريد الإلكتروني لحساب PayPal:</label>
-                <input type="email" name="paypal_email" id="paypal_email" placeholder="أدخل بريد PayPal">
-                
-                <label for="paypal_code">رمز التأكيد:</label>
-                <input type="text" name="paypal_code" id="paypal_code" placeholder="أدخل رمز التأكيد">
-            </div>
+        <div id="visa_fields" class="payment-field">
+            <label for="card_number">رقم البطاقة:</label>
+            <input type="text" name="card_number" id="card_number" placeholder="أدخل رقم البطاقة">
+            <label for="card_expiry">تاريخ انتهاء الصلاحية:</label>
+            <input type="text" name="card_expiry" id="card_expiry" placeholder="MM/YY">
+            <label for="card_code">رمز CVV:</label>
+            <input type="text" name="card_code" id="card_code" placeholder="أدخل رمز CVV">
+            <label for="cardholder_name">اسم حامل البطاقة:</label>
+            <input type="text" name="cardholder_name" id="cardholder_name" placeholder="أدخل اسم حامل البطاقة">
+        </div>
 
-            <div id="mobo_fields" class="payment-field">
-                <label for="mobo_account_number">رقم حساب Mobo Cash:</label>
-                <input type="text" name="mobo_account_number" id="mobo_account_number" placeholder="أدخل رقم الحساب">
-                
-                <label for="mobo_confirmation_code">رمز التأكيد:</label>
-                <input type="text" name="mobo_confirmation_code" id="mobo_confirmation_code" placeholder="أدخل رمز التأكيد">
-            </div>
+        <div id="paypal_fields" class="payment-field">
+            <label for="paypal_email">البريد الإلكتروني لحساب PayPal:</label>
+            <input type="email" name="paypal_email" id="paypal_email" placeholder="أدخل بريد PayPal">
+            <label for="paypal_code">رمز التأكيد:</label>
+            <input type="text" name="paypal_code" id="paypal_code" placeholder="أدخل رمز التأكيد">
+        </div>
 
-            <div id="account_fields" class="payment-field">
-                <label for="account_number">رقم الحساب:</label>
-                <input type="text" name="account_number" id="account_number" placeholder="أدخل رقم الحساب">
-                
-                <label for="account_code">رمز الحساب:</label>
-                <input type="text" name="account_code" id="account_code" placeholder="أدخل رمز الحساب">
-            </div>
+        <div id="mobo_fields" class="payment-field">
+            <label for="mobo_account_number">رقم حساب Mobo Cash:</label>
+            <input type="text" name="mobo_account_number" id="mobo_account_number" placeholder="أدخل رقم الحساب">
+            <label for="mobo_confirmation_code">رمز التأكيد:</label>
+            <input type="text" name="mobo_confirmation_code" id="mobo_confirmation_code" placeholder="أدخل رمز التأكيد">
+        </div>
 
-            <button type="submit">أدفع الآن</button>
-        </form>
-    </div>
+        <div id="account_fields" class="payment-field">
+            <label for="account_number">رقم الحساب:</label>
+            <input type="text" name="account_number" id="account_number" placeholder="أدخل رقم الحساب">
+            <label for="account_code">رمز الحساب:</label>
+            <input type="text" name="account_code" id="account_code" placeholder="أدخل رمز الحساب">
+        </div>
+
+        <button type="submit">أدفع الآن</button>
+    </form>
+</div>
 
 </body>
 </html>

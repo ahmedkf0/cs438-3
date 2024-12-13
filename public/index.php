@@ -14,103 +14,28 @@ if (!$db) {
     die("Database connection error. Please check your configuration.");
 }
 
+// جلب كود الإحالة والنقاط إذا كان المستخدم مسجل الدخول
+$referralCode = null;
+$rewardPoints = 0;
+if (isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id'];
+    $stmt = $db->prepare("SELECT referral_code, reward_points FROM users WHERE user_id = :userId");
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($userData) {
+        $referralCode = $userData['referral_code'] ?? null;
+        $rewardPoints = $userData['reward_points'] ?? 0;
+    }
+}
+
 // جلب الفعاليات
 $events = Event::getAllEvents($db);
 
 // إنشاء كائن المراجعات
 $review = new Review($db);
-
-// إضافة التقييم عند تقديم النموذج
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_review'])) {
-    $eventId = (int)$_POST['event_id'];
-    $rating = (int)$_POST['rating'];
-    $reviewText = $_POST['review_text'];
-    $userId = $_SESSION['user_id'] ?? null;
-
-    if (!$userId) {
-        $_SESSION['message'] = "<p class='error'>يرجى تسجيل الدخول لتقديم تقييم.</p>";
-    } else {
-        // تحقق إذا كان المستخدم قد قام بالحجز لهذا الحدث
-        $stmt = $db->prepare("SELECT COUNT(*) FROM bookings WHERE user_id = :userId AND event_id = :eventId");
-        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-        $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
-        $stmt->execute();
-        $hasBooking = $stmt->fetchColumn();
-
-        if (!$hasBooking) {
-            $_SESSION['message'] = "<p class='error'>لا يمكنك تقييم حدث لم تقم بحجزه.</p>";
-        } else {
-            // تحقق إذا كان المستخدم قد قام بالفعل بتقييم هذا الحدث
-            $stmt = $db->prepare("SELECT COUNT(*) FROM reviews WHERE user_id = :userId AND event_id = :eventId");
-            $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-            $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
-            $stmt->execute();
-            $hasReviewed = $stmt->fetchColumn();
-
-            if ($hasReviewed) {
-                $_SESSION['message'] = "<p class='error'>لقد قمت بالفعل بتقييم هذا الحدث.</p>";
-            } else {
-                // أضف التقييم
-                $stmt = $db->prepare("INSERT INTO reviews (user_id, event_id, rating, review_text, created_at) VALUES (:userId, :eventId, :rating, :reviewText, NOW())");
-                $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-                $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
-                $stmt->bindParam(':rating', $rating, PDO::PARAM_INT);
-                $stmt->bindParam(':reviewText', $reviewText, PDO::PARAM_STR);
-
-                if ($stmt->execute()) {
-                    $_SESSION['message'] = "<p class='success'>تمت إضافة التقييم بنجاح.</p>";
-                } else {
-                    $_SESSION['message'] = "<p class='error'>حدث خطأ أثناء إضافة التقييم. حاول مرة أخرى.</p>";
-                }
-            }
-        }
-    }
-
-    // إعادة التوجيه لتجنب إعادة إرسال النموذج
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_review'])) {
-    $reviewId = (int)$_POST['review_id'];
-    $userId = $_SESSION['user_id'] ?? null;
-
-    if (!$userId) {
-        $_SESSION['message'] = "<p class='error'>يرجى تسجيل الدخول لحذف التقييم.</p>";
-    } else {
-        // التحقق من أن المستخدم هو صاحب التقييم
-        $stmt = $db->prepare("SELECT user_id FROM reviews WHERE review_id = :reviewId");
-        $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
-        $stmt->execute();
-        $reviewOwner = $stmt->fetchColumn();
-
-        if ($reviewOwner == $userId) {
-            // حذف التقييم
-            $stmt = $db->prepare("DELETE FROM reviews WHERE review_id = :reviewId");
-            $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
-            if ($stmt->execute()) {
-                $_SESSION['message'] = "<p class='success'>تم حذف التقييم بنجاح.</p>";
-            } else {
-                $_SESSION['message'] = "<p class='error'>حدث خطأ أثناء حذف التقييم. حاول مرة أخرى.</p>";
-            }
-        } else {
-            $_SESSION['message'] = "<p class='error'>لا يمكنك حذف تقييم ليس من إضافتك.</p>";
-        }
-    }
-
-    // إعادة التوجيه لتجنب إعادة إرسال الطلب
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
-}
-
-if (isset($_SESSION['message'])): ?>
-    <div class="message-container">
-        <?php 
-            echo $_SESSION['message'];
-            unset($_SESSION['message']); // مسح الرسالة بعد عرضها
-        ?>
-    </div>
-<?php endif; ?>
-
+?>
 
 <!DOCTYPE html>
 <html lang="ar">
@@ -118,6 +43,15 @@ if (isset($_SESSION['message'])): ?>
     <meta charset="UTF-8">
     <title>الفعاليات</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        function copyReferralCode() {
+            const referralInput = document.getElementById('referral-code');
+            referralInput.select();
+            referralInput.setSelectionRange(0, 99999); // للأجهزة المحمولة
+            document.execCommand('copy');
+            alert('تم نسخ كود الإحالة: ' + referralInput.value);
+        }
+    </script>
 </head>
 <body>
 
@@ -131,6 +65,24 @@ if (isset($_SESSION['message'])): ?>
             <a href="login.php" class="login-btn">تسجيل الدخول</a>
         <?php endif; ?>
     </div>
+
+    <!-- عرض كود الإحالة والنقاط -->
+    <?php if ($referralCode): ?>
+        <div class="referral-code-container">
+        <div>
+            <h3>كود الإحالة الخاص بك:</h3>
+            <p>يمكنك مشاركة هذا الكود مع أصدقائك:</p>
+            
+                <input type="text" id="referral-code" value="<?php echo $referralCode; ?>" readonly>
+                <button onclick="copyReferralCode()">نسخ</button>
+            </div>
+        </div>
+
+        <div class="reward-points-container">
+            <h3>النقاط المكتسبة:</h3>
+            <p>لقد حصلت على <strong><?php echo $rewardPoints; ?></strong> نقطة من الإحالات.</p>
+        </div>
+    <?php endif; ?>
 
     <h1>الفعاليات المتاحة</h1>
 
@@ -163,8 +115,8 @@ if (isset($_SESSION['message'])): ?>
                             <a class="btn gift-btn" href="login.php">إهداء حجز</a>
                         <?php endif; ?>
                     </div>
-                    
-                    
+
+
                     <div class="reviews-container">
                         <h3>المراجعات:</h3>
                         <?php if (!empty($reviews)): ?>
@@ -188,7 +140,6 @@ if (isset($_SESSION['message'])): ?>
                             <p>لا توجد مراجعات بعد.</p>
                         <?php endif; ?>
                     </div>
-
 
                     <!-- نموذج إضافة تقييم -->
                     <?php if (isset($_SESSION['user_id'])): ?>
