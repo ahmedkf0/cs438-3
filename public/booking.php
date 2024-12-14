@@ -139,12 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="booking.php?event_id=<?php echo $eventId; ?>">
         <label for="quantity">عدد التذاكر:</label>
         <input type="number" name="quantity" id="quantity" min="1" required>
-        <br>
-
-        <!-- حقل كود الإحالة -->
-        <label for="referral_code">كود الإحالة (اختياري):</label>
-        <input type="text" name="referral_code" id="referral_code">
-        <br>
+        
 
         <button type="submit">احجز الآن</button>
     </form>
