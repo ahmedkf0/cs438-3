@@ -1,33 +1,50 @@
 <?php
 
 include_once('User.php');
-require_once 'Event.php';
+require_once '../classes/UserFactory.php';
 
-class User {
-    private int $userId;
-    private string $name;
-    private string $email;
-    private string $password;
-    private string $role;
-    private ?string $birthdate;
+interface UserInterface {
+    public function getUserInfo();
+}
 
-    public function __construct(int $userId, string $name, string $email, string $password, string $role, ?string $birthdate = null) {
+
+class User implements UserInterface {    
+    private $userId;
+    private $name;
+    private $email;
+    private $password;
+    private $role;
+    private $birthdate;
+
+    public function __construct($userId, $name, $email, $password, $role, $birthdate = null) {
         $this->userId = $userId;
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
         $this->role = $role;
-        $this->birthdate = $birthdate ?? '';
+        $this->birthdate = $birthdate;
+    }
+    public function getUserInfo() {
+        return [
+            'userId' => $this->userId,
+            'name' => $this->name,
+            'email' => $this->email,
+            // أضف مزيد من المعلومات إذا لزم الأمر
+        ];
     }
 }
 
 class Admin extends User {
-    private $db; // تعريف خاصية db هنا
+    private $db; // خاصية الاتصال بقاعدة البيانات
 
-    // Constructor
-    public function __construct($userId, $name, $email, $phoneNumber, $birthdate, $password, $conn) {
-        parent::__construct($userId, $name, $email, $phoneNumber, $birthdate, $password);
+    public function __construct($userId, $name, $email, $password, $role, $birthdate = null, $conn) {
+        parent::__construct($userId, $name, $email, $password, $role, $birthdate);
         $this->db = $conn; // تخزين الاتصال بقاعدة البيانات
+    }
+    public function getUserInfo() {
+        return array_merge(parent::getUserInfo(), [
+            'role' => $this->role,
+        ]);
     }
 
     // Method to login
@@ -127,6 +144,12 @@ class Admin extends User {
             $stmtTickets->bindParam(':user_id', $userId);
             $stmtTickets->execute();
     
+            // حذف المراجعات المرتبطة بالمستخدم
+            $sqlReviews = "DELETE FROM reviews WHERE user_id = :user_id";
+            $stmtReviews = $this->db->prepare($sqlReviews);
+            $stmtReviews->bindParam(':user_id', $userId);
+            $stmtReviews->execute();
+    
             // حذف المستخدم
             $sqlUser = "DELETE FROM users WHERE user_id = :user_id";
             $stmtUser = $this->db->prepare($sqlUser);
@@ -178,6 +201,8 @@ class Admin extends User {
         // إرجاع نتائج المستخدم كصف مصفوفة
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    
     }
 
 
