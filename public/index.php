@@ -14,6 +14,92 @@ if (!$db) {
     die("Database connection error. Please check your configuration.");
 }
 
+// معالجة حذف التقييم
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_review'])) {
+    $reviewId = $_POST['review_id'];
+    $userId = $_SESSION['user_id'];
+
+    // تحقق من أن المستخدم مسجل الدخول
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: login.php");
+        exit();
+    }
+
+    // التحقق من أن التقييم مملوك للمستخدم
+    $stmt = $db->prepare("SELECT COUNT(*) FROM reviews WHERE review_id = :reviewId AND user_id = :userId");
+    $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $isOwnedByUser = $stmt->fetchColumn();
+
+    if (!$isOwnedByUser) {
+        echo "<p class='error'>لا يمكنك حذف تقييم ليس ملكك.</p>";
+        exit();
+    }
+
+    // حذف التقييم من قاعدة البيانات
+    $stmt = $db->prepare("DELETE FROM reviews WHERE review_id = :reviewId");
+    $stmt->bindParam(':reviewId', $reviewId, PDO::PARAM_INT);
+
+    if ($stmt->execute()) {
+        echo "<p class='success'>تم حذف التقييم بنجاح!</p>";
+    } else {
+        echo "<p class='error'>حدث خطأ أثناء حذف التقييم. حاول مرة أخرى لاحقًا.</p>";
+    }
+}
+
+// إذا تم إرسال نموذج إضافة مراجعة
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_review'])) {
+    $eventId = $_POST['event_id'];
+    $rating = $_POST['rating'];
+    $reviewText = $_POST['review_text'];
+    $userId = $_SESSION['user_id'];
+
+    // التحقق من أن المستخدم مسجل الدخول
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: login.php");
+        exit();
+    }
+
+    // التحقق من أن المستخدم لديه حجز لهذا الحدث
+    $stmt = $db->prepare("SELECT COUNT(*) FROM bookings WHERE user_id = :userId AND event_id = :eventId");
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+    $stmt->execute();
+    $hasBooking = $stmt->fetchColumn();
+
+    if (!$hasBooking) {
+        echo "<p class='error'>لا يمكنك تقييم الفعالية دون حجز مسبق.</p>";
+        exit();
+    }
+
+    // التحقق من عدم وجود مراجعة مسبقة
+    $stmt = $db->prepare("SELECT COUNT(*) FROM reviews WHERE user_id = :userId AND event_id = :eventId");
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+    $stmt->execute();
+    $hasReviewed = $stmt->fetchColumn();
+
+    if ($hasReviewed) {
+        echo "<p class='error'>لقد قمت بتقييم هذا الحدث مسبقًا.</p>";
+        exit();
+    }
+
+    // إضافة المراجعة إلى قاعدة البيانات
+    $stmt = $db->prepare("INSERT INTO reviews (user_id, event_id, rating, review_text, created_at) 
+                          VALUES (:userId, :eventId, :rating, :reviewText, NOW())");
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
+    $stmt->bindParam(':rating', $rating, PDO::PARAM_INT);
+    $stmt->bindParam(':reviewText', $reviewText, PDO::PARAM_STR);
+
+    if ($stmt->execute()) {
+        echo "<p class='success'>تمت إضافة مراجعتك بنجاح!</p>";
+    } else {
+        echo "<p class='error'>حدث خطأ أثناء إضافة المراجعة. حاول مرة أخرى لاحقًا.</p>";
+    }
+}
+
 // جلب كود الإحالة والنقاط إذا كان المستخدم مسجل الدخول
 $referralCode = null;
 $rewardPoints = 0;
@@ -36,6 +122,7 @@ $events = Event::getAllEvents($db);
 // إنشاء كائن المراجعات
 $review = new Review($db);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ar">
@@ -68,10 +155,11 @@ $review = new Review($db);
 
     <!-- عرض كود الإحالة والنقاط -->
     <?php if ($referralCode): ?>
+        <div class="event-card">
         <div class="referral-code-container">
-        <div>
-            <h3>كود الإحالة الخاص بك:</h3>
-            <p>يمكنك مشاركة هذا الكود مع أصدقائك:</p>
+            <div>
+                <h3>كود الإحالة الخاص بك</h3>
+                <p>يمكنك مشاركة هذا الكود مع أصدقائك: للحصول على النقاط</p>
             
                 <input type="text" id="referral-code" value="<?php echo $referralCode; ?>" readonly>
                 <button onclick="copyReferralCode()">نسخ</button>
@@ -81,6 +169,7 @@ $review = new Review($db);
         <div class="reward-points-container">
             <h3>النقاط المكتسبة:</h3>
             <p>لقد حصلت على <strong><?php echo $rewardPoints; ?></strong> نقطة من الإحالات.</p>
+        </div>
         </div>
     <?php endif; ?>
 

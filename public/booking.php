@@ -85,12 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateSeatsStmt->bindParam(':eventId', $eventId, PDO::PARAM_INT);
         $updateSeatsStmt->execute();
 
-        // خصم النقاط المستخدمة
-        $usedPoints = ($discountPercentage / 5) * 50;
-        $updatePointsStmt = $db->prepare("UPDATE users SET reward_points = reward_points - :usedPoints WHERE user_id = :userId");
-        $updatePointsStmt->bindParam(':usedPoints', $usedPoints, PDO::PARAM_INT);
-        $updatePointsStmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-        $updatePointsStmt->execute();
+       
 
         // التوجيه إلى checkout.php
         header("Location: checkout.php?booking_id=$bookingId");

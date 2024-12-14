@@ -1,178 +1,323 @@
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --hover-bg-color: #575757;
+    --error-color: red;
+    --success-color: green;
+    --logout-bg-color: #dc3545;
+    --logout-hover-bg-color: #c82333;
+    --text-color: white;
+    --font-size-default: 16px;
+    --padding-small: 10px;
+    --padding-medium: 14px 20px;
+    --border-radius: 5px;
+    --transition-duration: 0.3s;
+}
+
 /* شريط التنقل */
 .navbar {
-    background-color: #333;
+    background-color: var(--primary-bg-color);
     overflow: hidden;
     text-align: center;
-    padding: 10px 0;
+    padding: var(--padding-small) 0;
 }
 
 .navbar a {
-    color: white;
-    padding: 14px 20px;
+    color: var(--text-color);
+    padding: var(--padding-medium);
     text-decoration: none;
-    font-size: 16px;
+    font-size: var(--font-size-default);
 }
 
 .navbar a:hover {
-    background-color: #575757;
+    background-color: var(--hover-bg-color);
 }
 
 /* زر تسجيل الخروج */
 .logout-btn {
     float: right;
     margin-right: 20px;
-    background-color: #dc3545;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    background-color: var(--logout-bg-color);
+    color: var(--text-color);
+    padding: var(--padding-small) var(--padding-medium);
+    border-radius: var(--border-radius);
     text-decoration: none;
-    font-size: 14px;
-    transition: background-color 0.3s;
+    font-size: calc(var(--font-size-default) - 2px);
+    transition: background-color var(--transition-duration);
 }
 
 .logout-btn:hover {
-    background-color: #c82333;
+    background-color: var(--logout-hover-bg-color);
 }
 
 /* تنسيق الرسائل */
 .success {
-    color: green;
+    color: var(--success-color);
     text-align: center;
-    font-size: 18px;
+    font-size: calc(var(--font-size-default) + 2px);
 }
 
 .error {
-    color: red;
+    color: var(--error-color);
     text-align: center;
-    font-size: 18px;
+    font-size: calc(var(--font-size-default) + 2px);
+}
+
+/* تعريف المتغيرات */
+:root {
+    --table-width: 80%;
+    --margin-auto: 20px auto;
+    --padding-small: 8px;
+    --padding-medium: 15px;
+    --font-weight-bold: bold;
+    --text-color-dark: #333;
+    --text-color-primary: #007BFF;
+    --text-color-light: white;
+    --bg-color-light: #f9f9f9;
+    --bg-color-dark: #333;
+    --bg-color-secondary: #f2f2f2;
+    --border-color-light: #ddd;
+    --border-color-medium: #ccc;
+    --box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    --border-radius: 5px;
 }
 
 /* تنسيق الجدول */
 table {
-    width: 80%;
-    margin: 20px auto;
+    width: var(--table-width);
+    margin: var(--margin-auto);
     border-collapse: collapse;
-    background-color: white;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-.event-card p strong {
-    font-weight: bold;
-    color: #333;
-}
-
-.event-card p:last-child {
-    font-size: 1.2em;
-    color: #007BFF;
-}
-
-.reviews-container {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.review {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-}
-
-.review h4 {
-    margin: 0;
-    font-weight: bold;
-}
-
-.review p {
-    margin: 5px 0;
+    background-color: var(--text-color-light);
+    box-shadow: var(--box-shadow);
 }
 
 table, th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+    border: 1px solid var(--border-color-light);
+    padding: var(--padding-small);
     text-align: center;
 }
 
 th {
-    background-color: #333;
-    color: white;
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-light);
 }
 
 tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: var(--bg-color-secondary);
 }
 
-h1 {
-    text-align: center;
-    margin-top: 20px;
-    color: #333;
-}
-/* شريط التنقل */
-.navbar {
-    background-color: #333;
-    overflow: hidden;
-    text-align: center;
-    padding: 10px 0;
+/* تنسيق بطاقة الحدث */
+.event-card p strong {
+    font-weight: var(--font-weight-bold);
+    color: var(--text-color-dark);
 }
 
+.event-card p:last-child {
+    font-size: 1.2em;
+    color: var(--text-color-primary);
+}
+
+/* تنسيق مراجعات المستخدمين */
 .reviews-container {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    margin-top: var(--margin-auto);
+    padding: var(--padding-medium);
+    background: var(--bg-color-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
 }
 
 .review {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
+    margin-bottom: var(--margin-auto);
+    padding: var(--padding-small);
+    border-bottom: 1px solid var(--border-color-medium);
 }
 
 .review h4 {
     margin: 0;
-    font-weight: bold;
-}
-.btn-group {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 10px;
-}
-
-.btn {
-    display: inline-block;
-    background: #007BFF;
-    color: #fff;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-    background: #0056b3;
-}
-
-.gift-btn {
-    background: #28a745;
-}
-
-.gift-btn:hover {
-    background: #1e7e34;
+    font-weight: var(--font-weight-bold);
 }
 
 .review p {
     margin: 5px 0;
 }
 
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --secondary-bg-color: #007BFF;
+    --hover-secondary-bg-color: #0056b3;
+    --success-bg-color: #28a745;
+    --text-color-dark: #333;
+    --text-color-light: #fff;
+    --bg-color-light: #f9f9f9;
+    --border-color-light: #ddd;
+    --border-color-medium: #ccc;
+    --font-size-small: 14px;
+    --padding-small: 10px;
+    --padding-medium: 15px;
+    --border-radius: 5px;
+    --transition-duration: 0.3s ease;
+    --margin-top: 20px;
+}
+
+/* تنسيق العنوان */
+h1 {
+    text-align: center;
+    margin-top: var(--margin-top);
+    color: var(--text-color-dark);
+}
+
+/* شريط التنقل */
+.navbar {
+    background-color: var(--primary-bg-color);
+    overflow: hidden;
+    text-align: center;
+    padding: var(--padding-small) 0;
+}
+
+/* حاوية المراجعات */
+.reviews-container {
+    margin-top: var(--margin-top);
+    padding: var(--padding-medium);
+    background: var(--bg-color-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
+}
+
+/* المراجعة الفردية */
+.review {
+    margin-bottom: var(--margin-top);
+    padding: var(--padding-small);
+    border-bottom: 1px solid var(--border-color-medium);
+}
+
+.review h4 {
+    margin: 0;
+    font-weight: bold;
+}
+
+/* مجموعة الأزرار */
+.btn-group {
+    display: flex;
+    justify-content: space-around;
+    margin-top: var(--padding-small);
+}
+
+/* زر عام */
+.btn {
+    display: inline-block;
+    background: var(--secondary-bg-color);
+    color: var(--text-color-light);
+    padding: var(--padding-small) calc(var(--padding-small) * 2);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-small);
+    transition: background-color var(--transition-duration);
+}
+
+.btn:hover {
+    background: var(--hover-secondary-bg-color);
+}
+
+/* زر الهدايا */
+.gift-btn {
+    background: var(--success-bg-color);
+}
+
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --secondary-bg-color: #007BFF;
+    --hover-secondary-bg-color: #0056b3;
+    --success-bg-color: #28a745;
+    --hover-success-bg-color: #1e7e34;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --bg-color-light: #f9f9f9;
+    --bg-color-form: #f1f1f1;
+    --border-color-light: #ddd;
+    --border-color-medium: #ccc;
+    --font-size-default: 16px;
+    --padding-small: 10px;
+    --padding-medium: 15px;
+    --border-radius: 5px;
+    --margin-small: 5px;
+    --margin-medium: 10px;
+    --margin-large: 20px;
+    --transition-duration: 0.3s ease;
+}
+
+/* شريط التنقل */
+.navbar {
+    background-color: var(--primary-bg-color);
+    overflow: hidden;
+    text-align: center;
+    padding: var(--padding-small) 0;
+}
+
+.navbar a {
+    color: var(--text-color-light);
+    padding: calc(var(--padding-small) + 4px) calc(var(--padding-small) * 2);
+    text-decoration: none;
+    font-size: var(--font-size-default);
+}
+
+/* الأزرار */
+.btn {
+    display: inline-block;
+    background: var(--secondary-bg-color);
+    color: var(--text-color-light);
+    padding: var(--padding-small) calc(var(--padding-small) * 2);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-size: calc(var(--font-size-default) - 2px);
+    transition: background-color var(--transition-duration);
+}
+
+.btn:hover {
+    background: var(--hover-secondary-bg-color);
+}
+
+.gift-btn {
+    background: var(--success-bg-color);
+}
+
+.gift-btn:hover {
+    background: var(--hover-success-bg-color);
+}
+
+/* حاوية المراجعات */
+.reviews-container {
+    margin-top: var(--margin-medium);
+    padding: var(--padding-small);
+    background: var(--bg-color-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
+}
+
+/* المراجعة الفردية */
+.review {
+    margin-bottom: var(--margin-medium);
+    padding: var(--padding-small);
+    border-bottom: 1px solid var(--border-color-medium);
+}
+
+.review h4 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.review p {
+    margin: var(--margin-small) 0;
+}
+
+/* إضافة المراجعات */
 .add-review {
-    margin-top: 20px;
-    padding: 15px;
-    background: #f1f1f1;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    margin-top: var(--margin-large);
+    padding: var(--padding-small);
+    background: var(--bg-color-form);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
 }
 
 .add-review form {
@@ -182,66 +327,54 @@ h1 {
 
 .add-review label {
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: var(--margin-small);
 }
 
 .add-review textarea {
     resize: none;
-    margin-bottom: 10px;
-}
-.reviews-container {
-    margin-top: 10px;
-    padding: 10px;
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    margin-bottom: var(--margin-medium);
 }
 
-.review {
-    margin-bottom: 10px;
-    padding: 5px;
-    border-bottom: 1px solid #ccc;
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --hover-bg-color: #575757;
+    --text-color-dark: #333;
+    --text-color-muted: #555;
+    --bg-color-light: #fff;
+    --border-color-light: #ddd;
+    --box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    --btn-bg-color: #28a745;
+    --btn-hover-bg-color: #218838;
+    --font-size-default: 16px;
+    --font-size-small: 14px;
+    --padding-small: 10px;
+    --padding-medium: 20px;
+    --margin-small: 8px;
+    --margin-medium: 15px;
+    --margin-large: 20px;
+    --border-radius: 8px;
+    --transition-duration: 0.3s;
+    --scale-hover: 1.05;
 }
 
-.review p {
-    margin: 5px 0;
-}
-
-.add-review {
-    margin-top: 15px;
-    padding: 10px;
-    background: #f1f1f1;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-.add-review form {
-    display: flex;
-    flex-direction: column;
-}
-
-.add-review textarea {
-    resize: none;
-    margin-bottom: 10px;
-}
-
-
+/* شريط التنقل */
 .navbar a {
-    color: white;
-    padding: 14px 20px;
+    color: var(--bg-color-light);
+    padding: calc(var(--padding-small) + 4px) calc(var(--padding-small) * 2);
     text-decoration: none;
-    font-size: 16px;
+    font-size: var(--font-size-default);
 }
 
 .navbar a:hover {
-    background-color: #575757;
+    background-color: var(--hover-bg-color);
 }
 
 /* تنسيق عنوان الصفحة */
 h1 {
     text-align: center;
-    margin-top: 20px;
-    color: #333;
+    margin-top: var(--margin-large);
+    color: var(--text-color-dark);
 }
 
 /* تنسيق عرض الفعاليات كبطاقات */
@@ -249,187 +382,239 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 20px;
+    padding: var(--padding-medium);
 }
 
 .event-card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background-color: var(--bg-color-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
     width: 300px;
-    margin: 15px;
-    padding: 20px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin: var(--margin-medium);
+    padding: var(--padding-medium);
+    box-shadow: var(--box-shadow);
     text-align: center;
-    transition: transform 0.2s;
+    transition: transform var(--transition-duration);
 }
 
 .event-card:hover {
-    transform: scale(1.05);
+    transform: scale(var(--scale-hover));
 }
 
 .event-card h2 {
-    color: #333;
-    margin-bottom: 10px;
+    color: var(--text-color-dark);
+    margin-bottom: var(--margin-small);
 }
 
 .event-card p {
-    color: #555;
-    margin: 8px 0;
+    color: var(--text-color-muted);
+    margin: var(--margin-small) 0;
 }
 
 /* تنسيق زر الحجز */
 .btn {
     display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
+    margin-top: var(--margin-small);
+    padding: var(--padding-small) calc(var(--padding-small) * 2);
+    background-color: var(--btn-bg-color);
+    color: var(--bg-color-light);
+    border-radius: var(--border-radius);
     text-decoration: none;
-    font-size: 14px;
-    transition: background-color 0.3s;
+    font-size: var(--font-size-small);
+    transition: background-color var(--transition-duration);
     cursor: pointer;
 }
 
 .btn:hover {
-    background-color: #218838;
+    background-color: var(--btn-hover-bg-color);
+}
+
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --hover-bg-color: #575757;
+    --success-color: green;
+    --error-color: red;
+    --btn-bg-color: #28a745;
+    --btn-hover-bg-color: #218838;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --text-color-muted: #555;
+    --bg-color-light: #fff;
+    --box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --font-size-large: 24px;
+    --font-size-medium: 18px;
+    --font-size-small: 16px;
+    --padding-small: 10px;
+    --padding-medium: 20px;
+    --margin-small: 10px;
+    --margin-medium: 20px;
+    --margin-large: 50px;
 }
 
 /* تنسيق الرسائل */
-.success {
-    color: green;
+.success, .error {
     text-align: center;
-    font-size: 18px;
+    font-size: var(--font-size-medium);
+}
+
+.success {
+    color: var(--success-color);
 }
 
 .error {
-    color: red;
-    text-align: center;
-    font-size: 18px;
+    color: var(--error-color);
 }
+
 /* تنسيق عنوان الصفحة */
 h1 {
     text-align: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    color: #333;
-    font-size: 24px;
+    margin: var(--margin-medium) 0;
+    color: var(--text-color-dark);
+    font-size: var(--font-size-large);
     width: 100%; /* لضمان أن العنوان يشغل سطر كامل */
 }
+
 /* شريط التنقل */
 .navbar {
-    background-color: #333;
+    background-color: var(--primary-bg-color);
     overflow: hidden;
     text-align: center;
-    padding: 10px 0;
+    padding: var(--padding-small) 0;
 }
 
 .navbar a {
-    color: white;
-    padding: 14px 20px;
+    color: var(--text-color-light);
+    padding: calc(var(--padding-small) + 4px) calc(var(--padding-small) * 2);
     text-decoration: none;
-    font-size: 16px;
+    font-size: var(--font-size-small);
 }
 
 .navbar a:hover {
-    background-color: #575757;
+    background-color: var(--hover-bg-color);
 }
 
 /* تنسيق صفحة الحجز */
 .booking-container {
     width: 80%;
     max-width: 400px;
-    margin: 50px auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin: var(--margin-large) auto;
+    background-color: var(--bg-color-light);
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     text-align: center;
 }
 
 .booking-container h1 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 24px;
+    color: var(--text-color-dark);
+    margin-bottom: var(--margin-medium);
+    font-size: var(--font-size-large);
 }
 
 .booking-container p {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 20px;
+    font-size: var(--font-size-medium);
+    color: var(--text-color-muted);
+    margin-bottom: var(--margin-medium);
 }
 
 /* تنسيق زر الحجز */
 .btn {
     display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
+    margin-top: var(--margin-small);
+    padding: var(--padding-small) calc(var(--padding-small) * 2);
+    background-color: var(--btn-bg-color);
+    color: var(--text-color-light);
+    border-radius: var(--border-radius);
     text-decoration: none;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    font-size: var(--font-size-small);
+    transition: background-color 0.3s ease;
     cursor: pointer;
     border: none;
 }
 
 .btn:hover {
-    background-color: #218838;
+    background-color: var(--btn-hover-bg-color);
+}
+
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --hover-bg-color: #575757;
+    --btn-bg-color: #28a745;
+    --btn-hover-bg-color: #218838;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --text-color-muted: #555;
+    --bg-color-light: #fff;
+    --border-color-light: #ddd;
+    --box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    --border-radius: 5px;
+    --font-size-large: 24px;
+    --font-size-medium: 18px;
+    --font-size-small: 16px;
+    --padding-small: 10px;
+    --padding-medium: 20px;
+    --margin-small: 10px;
+    --margin-medium: 15px;
+    --margin-large: 50px;
+    --input-width-small: 100px;
+    --transition-duration: 0.3s;
+}
+
+/* شريط التنقل */
+.navbar {
+    background-color: var(--primary-bg-color);
+    overflow: hidden;
+    text-align: center;
+    padding: var(--padding-small) 0;
+}
+
+.navbar a {
+    color: var(--text-color-light);
+    padding: calc(var(--padding-small) + 4px) calc(var(--padding-small) * 2);
+    text-decoration: none;
+    font-size: var(--font-size-small);
+}
+
+.navbar a:hover {
+    background-color: var(--hover-bg-color);
 }
 
 /* تنسيق حقل الإدخال */
 input[type="number"] {
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 16px;
-    width: 100px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    padding: var(--padding-small);
+    margin-top: var(--margin-small);
+    font-size: var(--font-size-small);
+    width: var(--input-width-small);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
     text-align: center;
-}
-/* شريط التنقل */
-.navbar {
-    background-color: #333;
-    overflow: hidden;
-    text-align: center;
-    padding: 10px 0;
-}
-
-.navbar a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.navbar a:hover {
-    background-color: #575757;
 }
 
 /* تنسيق حاوية صفحة الدفع */
 .payment-container {
     width: 80%;
     max-width: 500px;
-    margin: 50px auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin: var(--margin-large) auto;
+    background-color: var(--bg-color-light);
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     text-align: center;
 }
 
 .payment-container h1 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 24px;
+    color: var(--text-color-dark);
+    margin-bottom: var(--margin-medium);
+    font-size: var(--font-size-large);
 }
 
 .payment-container p {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 20px;
+    font-size: var(--font-size-medium);
+    color: var(--text-color-muted);
+    margin-bottom: var(--margin-medium);
 }
 
 /* تنسيق حقول الدفع */
@@ -437,41 +622,66 @@ input[type="number"] {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin: 15px 0;
+    margin: var(--margin-medium) 0;
 }
 
 .payment-field label {
-    font-size: 14px;
-    margin-bottom: 5px;
-    color: #333;
+    font-size: var(--font-size-small);
+    margin-bottom: var(--margin-small);
+    color: var(--text-color-dark);
 }
 
 .payment-field input {
-    padding: 10px;
+    padding: var(--padding-small);
     width: 100%;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-top: 5px;
+    font-size: var(--font-size-small);
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
+    margin-top: var(--margin-small);
 }
 
 /* تنسيق زر الدفع */
 button {
     display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
+    margin-top: var(--margin-medium);
+    padding: var(--padding-small) calc(var(--padding-small) * 2);
+    background-color: var(--btn-bg-color);
+    color: var(--text-color-light);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-small);
     cursor: pointer;
     border: none;
-    transition: background-color 0.3s;
+    transition: background-color var(--transition-duration);
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: var(--btn-hover-bg-color);
+}
+
+
+/* تعريف المتغيرات */
+:root {
+    --primary-bg-color: #333;
+    --hover-bg-color: #575757;
+    --btn-bg-color: #28a745;
+    --btn-hover-bg-color: #218838;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --text-color-muted: #555;
+    --error-color: red;
+    --success-color: green;
+    --bg-color-light: #fff;
+    --border-color-light: #ddd;
+    --box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --font-size-large: 18px;
+    --font-size-medium: 16px;
+    --font-size-small: 14px;
+    --padding-small: 10px;
+    --padding-medium: 20px;
+    --margin-small: 5px;
+    --margin-medium: 15px;
+    --margin-large: 50px;
 }
 
 /* إخفاء الحقول */
@@ -480,114 +690,91 @@ button:hover {
 }
 
 /* تنسيق الرسائل */
+.success, .error {
+    font-size: var(--font-size-large);
+    margin-top: var(--margin-medium);
+}
+
 .success {
-    color: green;
-    font-size: 18px;
-    margin-top: 20px;
+    color: var(--success-color);
 }
 
 .error {
-    color: red;
-    font-size: 18px;
-    margin-top: 20px;
+    color: var(--error-color);
 }
+
 /* شريط التنقل */
 .navbar {
-    background-color: #333;
+    background-color: var(--primary-bg-color);
     overflow: hidden;
     text-align: center;
-    padding: 10px 0;
+    padding: var(--padding-small) 0;
 }
 
 .navbar a {
-    color: white;
-    padding: 14px 20px;
+    color: var(--text-color-light);
+    padding: calc(var(--padding-small) + 4px) calc(var(--padding-small) * 2);
     text-decoration: none;
-    font-size: 16px;
+    font-size: var(--font-size-medium);
 }
 
 .navbar a:hover {
-    background-color: #575757;
+    background-color: var(--hover-bg-color);
 }
 
 /* تنسيق حاوية التسجيل */
 .register-container {
     width: 80%;
     max-width: 400px;
-    margin: 50px auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin: var(--margin-large) auto;
+    background-color: var(--bg-color-light);
+    padding: var(--padding-medium);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     text-align: center;
 }
 
 .register-container h2 {
-    color: #333;
-    margin-bottom: 20px;
+    color: var(--text-color-dark);
+    margin-bottom: var(--margin-medium);
 }
 
 .register-container label {
-    font-size: 14px;
-    color: #555;
+    font-size: var(--font-size-small);
+    color: var(--text-color-muted);
     display: block;
-    margin-top: 10px;
+    margin-top: var(--margin-small);
 }
 
 .register-container input[type="text"],
 .register-container input[type="email"],
 .register-container input[type="password"] {
-    padding: 10px;
-    margin-top: 5px;
-    font-size: 16px;
+    padding: var(--padding-small);
+    margin-top: var(--margin-small);
+    font-size: var(--font-size-medium);
     width: 100%;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid var(--border-color-light);
+    border-radius: var(--border-radius);
 }
 
 /* زر إنشاء الحساب */
 .btn {
     display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 16px;
+    margin-top: var(--margin-medium);
+    padding: var(--padding-small) calc(var(--padding-small) * 2);
+    background-color: var(--btn-bg-color);
+    color: var(--text-color-light);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-medium);
     cursor: pointer;
     border: none;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease;
 }
 
 .btn:hover {
-    background-color: #218838;
+    background-color: var(--btn-hover-bg-color);
 }
 
-/* تنسيق الرسالة عند الخطأ */
-.error {
-    color: red;
-    font-size: 14px;
-    margin-bottom: 15px;
-}
-/* شريط التنقل */
-.navbar {
-    background-color: #333;
-    overflow: hidden;
-    text-align: center;
-    padding: 10px 0;
-}
-
-.navbar a {
-    color: white;
-    padding: 14px 20px;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.navbar a:hover {
-    background-color: #575757;
-}
 
 /* تنسيق حاوية تسجيل الدخول */
 .login-container {
