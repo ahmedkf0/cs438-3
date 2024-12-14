@@ -1,5 +1,5 @@
 <?php
-
+//......
 // Observable Class
 class ReferralObservable {
     private array $observers = [];
